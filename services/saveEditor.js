@@ -1,4 +1,15 @@
 const fs = require('node:fs');
+const path = require('node:path');
+
+const ACTIVE_SAVE_PATH = path.join(__dirname, '..', 'data', 'active_save.json');
+
+function getActiveSavePath() {
+    return ACTIVE_SAVE_PATH;
+}
+
+function hasActiveSave() {
+    return fs.existsSync(ACTIVE_SAVE_PATH);
+}
 
 function loadSaveFile(path) {
     try {
@@ -38,5 +49,7 @@ module.exports = {
     loadSaveFile,
     getTeam,
     getPlayer,
-    saveSaveFile
+    saveSaveFile,
+    getActiveSavePath,
+    hasActiveSave
 };
