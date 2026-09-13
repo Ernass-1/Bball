@@ -12,6 +12,7 @@ A Discord bot base for managing Basketball GM leagues.
 2.  **Configuration:**
     *   Copy `.env.example` to `.env`.
     *   Fill in your `DISCORD_TOKEN` and `CLIENT_ID` (from the Discord Developer Portal).
+    *   `GUILD_ID`: (Optional) The ID of your specific Discord server. If set, commands will register instantly to this server for testing. If left blank, commands will register globally (which can take up to an hour to propagate).
     *   `COMMISH_CHANNEL_ID`: The ID of the channel where claim requests and free agency offers are sent.
     *   `COMMISSIONER_ROLE_ID`: The ID of the role allowed to approve/deny claims, upload save files, and resolve free agency offers.
     *   `DRAFT_CHANNEL_ID`: The ID of the channel where draft clock warnings and auto-pick announcements are posted.
@@ -33,6 +34,8 @@ A Discord bot base for managing Basketball GM leagues.
 
 ## Usage
 
+*   **Command Registration**: The bot automatically registers all slash commands on startup. You do not need to run a separate script. If you are developing, setting `GUILD_ID` in your `.env` file is recommended so that changes appear instantly on your test server. You can still run `node deploy-commands.js` manually if you need to force a refresh without restarting the bot.
+
 *   **/team claim [team_name]**: Claim a franchise. You can use the full name (e.g., "Los Angeles Lakers"), short name ("Lakers"), abbreviation ("LAL"), or numeric ID.
 
 *   **/trade propose [recipient] [your_player] [their_player]**: Propose a trade. The bot enforces a salary matching rule: a team can only take on incoming salary if it is less than or equal to 125% of the outgoing salary plus $100,000.
@@ -50,12 +53,6 @@ A Discord bot base for managing Basketball GM leagues.
     *   **Note**: The draft timer state is in-memory only and does not survive a bot restart. If the bot restarts mid-draft, the commissioner will need to re-run `/draft start` for the current season to resume timing.
 
 *   **/admin backup**: (Commissioner only) Forces an immediate backup to GitHub.
-
-4.  **Deploy Commands:**
-    Run this once (or whenever you add new commands) to register slash commands:
-    ```bash
-    npm run deploy
-    ```
 
 4.  **Run the bot:**
     ```bash
