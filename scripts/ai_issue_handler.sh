@@ -101,7 +101,7 @@ stage_run() {
   #
   # AIDER_MODEL (singular) is kept as a legacy override: if set and
   # AIDER_MODELS is not, it pins a single model with no fallback.
-  local models_csv="${AIDER_MODELS:-${AIDER_MODEL:-gemini/gemini-3-flash-preview,gemini/gemini-3.1-flash-lite,gemini/gemini-3.5-flash-lite}}"
+  local models_csv="${AIDER_MODELS:-${AIDER_MODEL:-gemini/gemini-3.1-flash-lite,gemini/gemini-3.5-flash-lite,gemini/gemini-3-flash-preview}}"
   IFS=',' read -ra MODEL_LIST <<< "${models_csv}"
 
   : > "${LOG_FILE}"  # start this run's combined log fresh
@@ -217,7 +217,7 @@ EOF
   fi
 
   if [[ "${HAS_CHANGES:-0}" == "0" ]]; then
-    comment_on_issue "🤖 I looked at this issue but didn't make any code changes — either I couldn't find a safe, concrete change to make, or the request needs more detail. Feel free to add more context and re-apply the \`ai-task\` label to try again."
+    comment_on_issue "🤖 I looked at this issue but didn't make any code changes — either I couldn't find a safe, concrete change to make, or the request needs more detail. Feel free to add more context and re-add the \`ai-task\` label to try again."
     echo "No changes produced by Aider. Not opening a PR."
     exit 0
   fi
