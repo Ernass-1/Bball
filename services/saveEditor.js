@@ -258,6 +258,26 @@ function saveSaveFile(save, path) {
     }
 }
 
+function getCurrentSeason(save) {
+    return save.gameAttributes ? save.gameAttributes.season : null;
+}
+
+function getExpiringContracts(save, teamId) {
+    const season = getCurrentSeason(save);
+    if (!season) return [];
+
+    if (!save.players) return [];
+
+    return save.players
+        .filter(p => p.tid === teamId && p.salaries && p.salaries.length > 0)
+        .filter(p => p.salaries[0].exp === season)
+        .map(p => ({
+            name: `${p.firstName} ${p.lastName}`,
+            pos: p.pos,
+            amount: p.salaries[0].amount
+        }));
+}
+
 module.exports = {
     loadSaveFile,
     getTeam,
@@ -273,5 +293,7 @@ module.exports = {
     getPickOrder,
     draftPlayer,
     ensureDirectoryExists,
-    validateAndStoreSave
+    validateAndStoreSave,
+    getExpiringContracts,
+    getCurrentSeason
 };
