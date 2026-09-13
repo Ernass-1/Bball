@@ -1,0 +1,15 @@
+{
+  "name": "bbgm-discord-bot",
+  "version": "1.0.0",
+  "description": "Discord bot base for Basketball GM league",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "deploy": "node deploy-commands.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.3.0",
+    "discord.js": "^14.16.2",
+    "dotenv": "^16.4.5"
+  }
+}
