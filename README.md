@@ -14,6 +14,8 @@ A Discord bot base for managing Basketball GM leagues.
     *   Fill in your `DISCORD_TOKEN` and `CLIENT_ID` (from the Discord Developer Portal).
     *   `COMMISH_CHANNEL_ID`: The ID of the channel where claim requests and free agency offers are sent.
     *   `COMMISSIONER_ROLE_ID`: The ID of the role allowed to approve/deny claims, upload save files, and resolve free agency offers.
+    *   `DRAFT_CHANNEL_ID`: The ID of the channel where draft clock warnings and auto-pick announcements are posted.
+    *   `DRAFT_PICK_SECONDS`: The countdown length per pick (default 90 seconds).
 
 3.  **Data Storage:**
     *   The bot stores the current league state in `data/active_save.json`. This directory is ignored by git to protect league data.
@@ -36,6 +38,8 @@ A Discord bot base for managing Basketball GM leagues.
 *   **/draft board**: Displays the next 5 upcoming picks and the top 10 remaining prospects (sorted by overall rating).
 *   **/draft pick [player_name]**: Allows the team owner currently on the clock to select a prospect.
     *   **Rookie Scale**: Drafted players receive a 4-year contract. The salary follows a linear scale starting at $10M for the first pick and decreasing by $250k per pick, with a minimum salary of $1M.
+    *   **Draft Timer**: The bot enforces a countdown per pick. If a team fails to pick in time, the bot will automatically draft the best available prospect.
+    *   **Note**: The draft timer state is in-memory only and does not survive a bot restart. If the bot restarts mid-draft, the commissioner will need to re-run `/draft start` for the current season to resume timing.
 
 4.  **Deploy Commands:**
     Run this once (or whenever you add new commands) to register slash commands:
