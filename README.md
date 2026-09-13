@@ -56,6 +56,8 @@ A Discord bot base for managing Basketball GM leagues.
 
 *   **/fa announce-expiring**: (Commissioner only) Posts a list of players with expiring contracts to each team's private channel. This is typically run at the start of the off-season, before opening free agency.
 
+*   **/rfa announce**: (Commissioner only) Posts a list of RFA-eligible players to each team's private channel. This is typically run at the start of the off-season, around the same time as `/fa announce-expiring`.
+
 *   **/fa close [player_name]**: (Commissioner only) Closes bidding on a player and automatically signs them to the best offer.
     *   **Evaluation Logic**: The bot calculates a score for each offer using the formula: `Score = (AmountPerYear * Years) * (1 + TeamWinPercentage)`. This prioritizes higher total contract value, while using the team's current win percentage as a tie-breaker/preference factor.
 
