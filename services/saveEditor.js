@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const zlib = require('node:zlib');
 
 const ACTIVE_SAVE_PATH = path.join(__dirname, '..', 'data', 'active_save.json');
 
@@ -16,6 +17,39 @@ function getActiveSavePath() {
 
 function hasActiveSave() {
     return fs.existsSync(ACTIVE_SAVE_PATH);
+}
+
+function decompressIfNeeded(buffer) {
+    // Check for gzip magic number: 0x1f 0x8b
+    if (buffer.length >= 2 && buffer[0] === 0x1f && buffer[1] === 0x8b) {
+        try {
+            return zlib.gunzipSync(buffer);
+        } catch (error) {
+            throw new Error("File looked gzip-compressed but failed to decompress — it may be corrupted.");
+        }
+    }
+    return buffer;
+}
+
+function validateAndStoreSave(rawBuffer) {
+    const decompressed = decompressIfNeeded(rawBuffer);
+    let save;
+    try {
+        save = JSON.parse(decompressed.toString('utf8'));
+    } catch (error) {
+        throw new Error("Invalid JSON in save file.");
+    }
+
+    if (!save.teams || !Array.isArray(save.teams) || !save.players || !Array.isArray(save.players)) {
+        throw new Error("Invalid BBGM save format: Missing teams or players arrays.");
+    }
+
+    saveSaveFile(save, ACTIVE_SAVE_PATH);
+
+    return {
+        teamCount: save.teams.length,
+        playerCount: save.players.length
+    };
 }
 
 function loadSaveFile(path) {
@@ -238,5 +272,6 @@ module.exports = {
     getDraftProspects,
     getPickOrder,
     draftPlayer,
-    ensureDirectoryExists
+    ensureDirectoryExists,
+    validateAndStoreSave
 };
