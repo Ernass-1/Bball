@@ -12,6 +12,8 @@ A Discord bot base for managing Basketball GM leagues.
 2.  **Configuration:**
     *   Copy `.env.example` to `.env`.
     *   Fill in your `DISCORD_TOKEN` and `CLIENT_ID` (from the Discord Developer Portal).
+    *   `COMMISH_CHANNEL_ID`: The ID of the channel where claim requests are sent.
+    *   `COMMISSIONER_ROLE_ID`: The ID of the role allowed to approve/deny claims.
 
 3.  **Deploy Commands:**
     Run this once (or whenever you add new commands) to register slash commands:

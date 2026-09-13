@@ -26,8 +26,26 @@ function unlinkTeam(discordId) {
     return stmt.run(discordId);
 }
 
+function linkTeamToUser(discordId, teamId) {
+    const stmt = db.prepare('INSERT OR REPLACE INTO team_links (discord_id, team_id) VALUES (?, ?)');
+    return stmt.run(discordId, teamId);
+}
+
+function getTeamOwner(teamId) {
+    const stmt = db.prepare('SELECT discord_id FROM team_links WHERE team_id = ?');
+    return stmt.get(teamId);
+}
+
+function isTeamClaimed(teamId) {
+    const stmt = db.prepare('SELECT 1 FROM team_links WHERE team_id = ?');
+    return !!stmt.get(teamId);
+}
+
 module.exports = {
     linkTeam,
     getTeamLink,
-    unlinkTeam
+    unlinkTeam,
+    linkTeamToUser,
+    getTeamOwner,
+    isTeamClaimed
 };
