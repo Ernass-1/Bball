@@ -19,6 +19,17 @@ db.exec(`
     status TEXT DEFAULT 'pending',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS fa_offers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    discord_id TEXT NOT NULL,
+    team_id INTEGER NOT NULL,
+    player_name TEXT NOT NULL,
+    amount_per_year INTEGER NOT NULL,
+    years INTEGER NOT NULL,
+    status TEXT DEFAULT 'open',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 function linkTeam(discordId, teamId) {
@@ -67,6 +78,32 @@ function updateTradeStatus(tradeId, status) {
     return stmt.run(status, tradeId);
 }
 
+function createFaOffer(discordId, teamId, playerName, amountPerYear, years) {
+    const stmt = db.prepare('INSERT INTO fa_offers (discord_id, team_id, player_name, amount_per_year, years, status) VALUES (?, ?, ?, ?, ?, ?)');
+    const info = stmt.run(discordId, teamId, playerName, amountPerYear, years, 'open');
+    return info.lastInsertRowid;
+}
+
+function getOpenOffersForPlayer(playerName) {
+    const stmt = db.prepare("SELECT * FROM fa_offers WHERE player_name = ? AND status = 'open' ORDER BY created_at DESC");
+    return stmt.all(playerName);
+}
+
+function getFaOffer(offerId) {
+    const stmt = db.prepare('SELECT * FROM fa_offers WHERE id = ?');
+    return stmt.get(offerId);
+}
+
+function updateFaOfferStatus(offerId, status) {
+    const stmt = db.prepare('UPDATE fa_offers SET status = ? WHERE id = ?');
+    return stmt.run(status, offerId);
+}
+
+function closeOtherOffersForPlayer(playerName, exceptOfferId) {
+    const stmt = db.prepare("UPDATE fa_offers SET status = 'rejected' WHERE player_name = ? AND id != ? AND status = 'open'");
+    return stmt.run(playerName, exceptOfferId);
+}
+
 module.exports = {
     linkTeam,
     getTeamLink,
@@ -76,5 +113,10 @@ module.exports = {
     isTeamClaimed,
     createTrade,
     getTrade,
-    updateTradeStatus
+    updateTradeStatus,
+    createFaOffer,
+    getOpenOffersForPlayer,
+    getFaOffer,
+    updateFaOfferStatus,
+    closeOtherOffersForPlayer
 };
