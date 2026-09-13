@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
-const { loadSaveFile, saveSaveFile, getActiveSavePath, hasActiveSave } = require('../services/saveEditor');
+const { loadSaveFile, saveSaveFile, getActiveSavePath, hasActiveSave, ensureDirectoryExists } = require('../services/saveEditor');
 const fs = require('node:fs');
 const https = require('node:https');
 const { isCommissioner } = require('../utils/permissions');
@@ -35,7 +35,15 @@ module.exports = {
 			await interaction.deferReply({ ephemeral: true });
 
 			const tempPath = `./data/temp_${Date.now()}.json`;
+			ensureDirectoryExists(tempPath);
 			const file = fs.createWriteStream(tempPath);
+
+			file.on('error', async (err) => {
+				console.error('File stream error during upload:', err);
+				file.close();
+				if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+				return interaction.editReply('Something went wrong saving that file — please try again.');
+			});
 
 			https.get(attachment.url, (response) => {
 				response.pipe(file);
