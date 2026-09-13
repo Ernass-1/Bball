@@ -1,6 +1,6 @@
 const { Events, EmbedBuilder } = require('discord.js');
-const { getFaOffer, updateFaOfferStatus, closeOtherOffersForPlayer, getOpenOffersForPlayer } = require('../database');
-const { hasActiveSave, loadSaveFile, saveSaveFile } = require('../services/saveEditor');
+const { getFaOffer, updateFaOfferStatus, closeOtherOffersForPlayer } = require('../database');
+const { hasActiveSave, loadSaveFile, saveSaveFile, canSignWithinCapRules, getActiveSavePath } = require('../services/saveEditor');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -28,15 +28,23 @@ module.exports = {
 			return interaction.reply({ content: 'No active save file found.', ephemeral: true });
 		}
 
+		const activeSavePath = process.env.ACTIVE_SAVE_PATH || getActiveSavePath();
+
 		let save;
 		try {
-			save = loadSaveFile();
+			save = loadSaveFile(activeSavePath);
 		} catch (error) {
 			return interaction.reply({ content: `Error loading save file: ${error.message}`, ephemeral: true });
 		}
 
 		if (!save.players) {
 			return interaction.reply({ content: 'No players found in save file.', ephemeral: true });
+		}
+
+		// Re-check cap rules at signing time
+		const capCheck = canSignWithinCapRules(save, offer.team_id, offer.amount_per_year);
+		if (!capCheck.allowed) {
+			return interaction.reply({ content: `Cannot sign this player: ${capCheck.reason}`, ephemeral: true });
 		}
 
 		const player = save.players.find(p => `${p.firstName} ${p.lastName}`.toLowerCase() === offer.player_name.toLowerCase());
@@ -49,7 +57,7 @@ module.exports = {
 		player.tid = offer.team_id;
 
 		try {
-			saveSaveFile(save);
+			saveSaveFile(save, activeSavePath);
 		} catch (error) {
 			return interaction.reply({ content: `Failed to save save file: ${error.message}`, ephemeral: true });
 		}

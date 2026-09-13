@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { getTeamLink, createFaOffer, getOpenOffersForPlayer, updateFaOfferStatus, closeOtherOffersForPlayer } = require('../database');
-const { hasActiveSave, loadSaveFile, getTeam, saveSaveFile } = require('../services/saveEditor');
+const { hasActiveSave, loadSaveFile, getTeam, saveSaveFile, canSignWithinCapRules, getActiveSavePath } = require('../services/saveEditor');
 const { evaluateOffers } = require('../services/faEngine');
 
 module.exports = {
@@ -36,6 +36,8 @@ module.exports = {
 			return interaction.reply({ content: "No active save file has been uploaded yet — ask your commissioner to upload one using `/save upload`.", ephemeral: true });
 		}
 
+		const activeSavePath = process.env.ACTIVE_SAVE_PATH || getActiveSavePath();
+
 		if (interaction.options.getSubcommand() === 'offer') {
 			const discordId = interaction.user.id;
 			const teamLink = getTeamLink(discordId);
@@ -51,7 +53,7 @@ module.exports = {
 
 			let save;
 			try {
-				save = loadSaveFile();
+				save = loadSaveFile(activeSavePath);
 			} catch (error) {
 				return interaction.reply({ content: `Error loading save file: ${error.message}`, ephemeral: true });
 			}
@@ -70,6 +72,12 @@ module.exports = {
 			const FA_TID = -1;
 			if (player.tid !== FA_TID) {
 				return interaction.reply({ content: `'${player.firstName} ${player.lastName}' is not a free agent.`, ephemeral: true });
+			}
+
+			// Check salary cap rules
+			const capCheck = canSignWithinCapRules(save, teamId, amountPerYear);
+			if (!capCheck.allowed) {
+				return interaction.reply({ content: capCheck.reason, ephemeral: true });
 			}
 
 			const resolvedTeam = getTeam(save, teamId);
@@ -112,7 +120,7 @@ module.exports = {
 			}
 
 			const playerName = interaction.options.getString('player_name');
-			const offers = getOpenOffersForPlayer(playerName);
+			let offers = getOpenOffersForPlayer(playerName);
 
 			if (!offers || offers.length === 0) {
 				return interaction.reply({ content: `There are no open offers for '${playerName}'.`, ephemeral: true });
@@ -120,12 +128,19 @@ module.exports = {
 
 			let save;
 			try {
-				save = loadSaveFile();
+				save = loadSaveFile(activeSavePath);
 			} catch (error) {
 				return interaction.reply({ content: `Error loading save file: ${error.message}`, ephemeral: true });
 			}
 
-			const winningOffer = evaluateOffers(save, offers);
+			// Filter offers by cap rules before evaluating
+			let validOffers = offers.filter(offer => canSignWithinCapRules(save, offer.team_id, offer.amount_per_year).allowed);
+
+			if (validOffers.length === 0) {
+				return interaction.reply({ content: `Could not sign ${playerName} because no remaining offers are valid under the salary cap.` });
+			}
+
+			const winningOffer = evaluateOffers(save, validOffers);
 
 			if (!winningOffer) {
 				return interaction.reply({ content: "Failed to evaluate offers.", ephemeral: true });
@@ -138,7 +153,7 @@ module.exports = {
 			}
 
 			player.tid = winningOffer.team_id;
-			saveSaveFile(save, process.env.ACTIVE_SAVE_PATH);
+			saveSaveFile(save, activeSavePath);
 
 			// Update DB
 			updateFaOfferStatus(winningOffer.id, 'signed');
@@ -150,7 +165,7 @@ module.exports = {
 			const embed = new EmbedBuilder()
 				.setTitle(`Free Agent Signed: ${playerName}`)
 				.setDescription(`**${teamName}** has signed ${playerName} to a ${winningOffer.years}-year deal worth $${winningOffer.amount_per_year.toLocaleString()} per year.`)
-				.setFooter({ text: `Evaluation: Highest total value weighted by team win percentage among ${offers.length} offers.` });
+				.setFooter({ text: `Evaluation: Highest total value weighted by team win percentage among ${validOffers.length} valid offers.` });
 
 			return interaction.reply({ embeds: [embed] });
 		}
