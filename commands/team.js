@@ -1,7 +1,8 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionFlagsBits } = require('discord.js');
 const { hasActiveSave, loadSaveFile, getActiveSavePath, resolveTeamId, getTeam } = require('../services/saveEditor.js');
-const { isTeamClaimed, upsertTeamRole, getRoleForTeam } = require('../database/index.js');
+const { isTeamClaimed, upsertTeamRole, getRoleForTeam, upsertTeamChannel, getChannelForTeam } = require('../database/index.js');
 const { isCommissioner } = require('../utils/permissions.js');
+const { getConfiguredRoleId } = require('../utils/config.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -22,7 +23,11 @@ module.exports = {
 		.addSubcommand(subcommand =>
 			subcommand
 				.setName('setuproles')
-				.setDescription('Create Discord roles for all teams (Commissioner only)')),
+				.setDescription('Create Discord roles for all teams (Commissioner only)'))
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('setupchannels')
+				.setDescription('Create private Discord channels for all teams (Commissioner only)')),
 	async execute(interaction) {
 		const subcommand = interaction.options.getSubcommand();
 
@@ -94,6 +99,93 @@ module.exports = {
 			return interaction.editReply(`Setup complete. Created: ${created}, Already existed: ${existed}, Errors: ${errors}.`);
 		}
 
+		if (subcommand === 'setupchannels') {
+			if (!isCommissioner(interaction.member)) {
+				return interaction.reply({ content: "You don't have permission to do that.", ephemeral: true });
+			}
+			if (!hasActiveSave()) {
+				return interaction.reply({ content: "No active save file found.", ephemeral: true });
+			}
+
+			await interaction.deferReply();
+
+			const save = loadSaveFile(getActiveSavePath());
+			const commishRoleId = getConfiguredRoleId('commissioner');
+			
+			// 1. Get or create category
+			const categoryName = 'Team Channels';
+			let category = interaction.guild.channels.cache.find(c => c.name === categoryName && c.type === ChannelType.GuildCategory);
+			
+			if (!category) {
+				category = await interaction.guild.channels.create({
+					name: categoryName,
+					type: ChannelType.GuildCategory,
+				});
+			}
+
+			let createdCount = 0;
+			let skippedCount = 0;
+			let failedCount = 0;
+			const summary = [];
+
+			for (const team of save.teams) {
+				const roleData = getRoleForTeam(team.tid);
+				if (!roleData) {
+					summary.push(`Skipped ${team.abbrev}: No role assigned.`);
+					skippedCount++;
+					continue;
+				}
+
+				// Check if channel already exists
+				const existingChannelData = getChannelForTeam(team.tid);
+				if (existingChannelData) {
+					const existingChannel = interaction.guild.channels.cache.get(existingChannelData.channel_id);
+					if (existingChannel) {
+						summary.push(`Skipped ${team.abbrev}: Channel already exists.`);
+						skippedCount++;
+						continue;
+					}
+				}
+
+				// Create channel
+				try {
+					const channel = await interaction.guild.channels.create({
+						name: team.abbrev.toLowerCase(),
+						type: ChannelType.GuildText,
+						parent: category.id,
+						permissionOverwrites: [
+							{
+								id: interaction.guild.id, // @everyone
+								deny: [PermissionFlagsBits.ViewChannel],
+							},
+							{
+								id: roleData.role_id, // Team role
+								allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory],
+							},
+							{
+								id: interaction.client.user.id, // Bot
+								allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages],
+							},
+							...(commishRoleId ? [{
+								id: commishRoleId,
+								allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory],
+							}] : []),
+						],
+					});
+
+					upsertTeamChannel(team.tid, channel.id);
+					createdCount++;
+					summary.push(`Created ${team.abbrev}.`);
+				} catch (error) {
+					console.error(`Failed to create channel for ${team.abbrev}:`, error);
+					failedCount++;
+					summary.push(`Failed ${team.abbrev}: ${error.message}`);
+				}
+			}
+
+			await interaction.editReply(`Setup complete.\nCreated: ${createdCount}, Skipped: ${skippedCount}, Failed: ${failedCount}\n\n${summary.join('\n')}`);
+		}
+
 		// Original claim logic
 		const teamInput = interaction.options.getString('team_name');
 		const discordId = interaction.user.id;
@@ -123,7 +215,7 @@ module.exports = {
 			return interaction.reply({ content: 'Commissioner channel not found. Please contact an admin.', ephemeral: true });
 		}
 
-		const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+		const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 		const embed = new EmbedBuilder()
 			.setTitle('New Team Claim Request')
 			.addFields(
