@@ -36,6 +36,72 @@ function getPlayer(save, playerId) {
     return save.players.find(p => p.pid === playerId) || null;
 }
 
+/**
+ * BBGM Save Structure Documentation (Issue #18):
+ * - draftPicks: Array of objects { tid, originalTid, round, pick, season }.
+ *   - 'tid' is the team that currently owns the pick.
+ *   - 'round' and 'pick' are 1-indexed.
+ * - Players: 
+ *   - Draft prospects have tid === -2.
+ *   - Draft year is stored in player.draft.year.
+ *   - Ratings (rankings) are in player.ratings, which is an array. 
+ *     The last entry is the most recent. We'll use 'ovr' for sorting prospects.
+ */
+
+function getDraftProspects(save, season) {
+    if (!save.players) return [];
+
+    return save.players
+        .filter(p => p.tid === -2 && p.draft && p.draft.year === season)
+        .sort((a, b) => {
+            const getOvr = (p) => (p.ratings && p.ratings.length > 0) ? p.ratings[p.ratings.length - 1].ovr : 0;
+            return getOvr(b) - getOvr(a);
+        });
+}
+
+function getPickOrder(save, season) {
+    if (!save.draftPicks) return [];
+
+    return save.draftPicks
+        .filter(p => p.season === season)
+        .sort((a, b) => {
+            if (a.round !== b.round) return a.round - b.round;
+            return a.pick - b.pick;
+        });
+}
+
+function draftPlayer(save, playerName, teamId, pickIndex, season) {
+    if (!save.players) throw new Error("No players found in save file.");
+
+    const player = save.players.find(p => 
+        (p.firstName + " " + p.lastName === playerName) && 
+        p.tid === -2 && 
+        p.draft && p.draft.year === season
+    );
+
+    if (!player) {
+        throw new Error(`Player '${playerName}' is not an available prospect for the ${season} draft.`);
+    }
+
+    // Rookie scale logic:
+    // Top pick starts at $10M. Decreases by $250k per pick index. Minimum $1M.
+    // This provides a simple documented linear scale for BBGM.
+    const baseAmount = 10000; // BBGM amounts are usually in thousands ($10,000k = $10M)
+    const step = 250;
+    const minAmount = 1000;
+    const amount = Math.max(minAmount, baseAmount - (pickIndex * step));
+
+    player.tid = teamId;
+    player.salaries = [
+        {
+            amount: amount,
+            exp: season + 3 // 4-year rookie contract (current + 3)
+        }
+    ];
+
+    return save;
+}
+
 function getPlayerSalary(save, playerName, teamId) {
     if (!save.players) return null;
 
@@ -160,5 +226,8 @@ module.exports = {
     getActiveSavePath,
     hasActiveSave,
     getPlayerSalary,
-    validateTradeSalaries
+    validateTradeSalaries,
+    getDraftProspects,
+    getPickOrder,
+    draftPlayer
 };

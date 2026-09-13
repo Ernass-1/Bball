@@ -32,6 +32,11 @@ A Discord bot base for managing Basketball GM leagues.
 *   **/fa close [player_name]**: (Commissioner only) Closes bidding on a player and automatically signs them to the best offer.
     *   **Evaluation Logic**: The bot calculates a score for each offer using the formula: `Score = (AmountPerYear * Years) * (1 + TeamWinPercentage)`. This prioritizes higher total contract value, while using the team's current win percentage as a tie-breaker/preference factor.
 
+*   **/draft start [season]**: (Commissioner only) Initializes the draft for the specified season and puts the first team on the clock.
+*   **/draft board**: Displays the next 5 upcoming picks and the top 10 remaining prospects (sorted by overall rating).
+*   **/draft pick [player_name]**: Allows the team owner currently on the clock to select a prospect.
+    *   **Rookie Scale**: Drafted players receive a 4-year contract. The salary follows a linear scale starting at $10M for the first pick and decreasing by $250k per pick, with a minimum salary of $1M.
+
 4.  **Deploy Commands:**
     Run this once (or whenever you add new commands) to register slash commands:
     ```bash

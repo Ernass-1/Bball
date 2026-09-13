@@ -30,6 +30,12 @@ db.exec(`
     status TEXT DEFAULT 'open',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS draft_state (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    season INTEGER NOT NULL,
+    current_pick_index INTEGER NOT NULL DEFAULT 0
+  );
 `);
 
 function linkTeam(discordId, teamId) {
@@ -104,6 +110,21 @@ function closeOtherOffersForPlayer(playerName, exceptOfferId) {
     return stmt.run(playerName, exceptOfferId);
 }
 
+function getDraftState() {
+    const stmt = db.prepare('SELECT * FROM draft_state WHERE id = 1');
+    return stmt.get();
+}
+
+function setDraftState(season, currentPickIndex) {
+    const stmt = db.prepare('INSERT OR REPLACE INTO draft_state (id, season, current_pick_index) VALUES (1, ?, ?)');
+    return stmt.run(season, currentPickIndex);
+}
+
+function advancePick() {
+    const stmt = db.prepare('UPDATE draft_state SET current_pick_index = current_pick_index + 1 WHERE id = 1');
+    return stmt.run();
+}
+
 module.exports = {
     linkTeam,
     getTeamLink,
@@ -118,5 +139,8 @@ module.exports = {
     getOpenOffersForPlayer,
     getFaOffer,
     updateFaOfferStatus,
-    closeOtherOffersForPlayer
+    closeOtherOffersForPlayer,
+    getDraftState,
+    setDraftState,
+    advancePick
 };
