@@ -125,6 +125,42 @@ function advancePick() {
     return stmt.run();
 }
 
+// Backup/Restore helpers
+function getAllData() {
+    return {
+        team_links: db.prepare('SELECT * FROM team_links').all(),
+        trades: db.prepare('SELECT * FROM trades').all(),
+        fa_offers: db.prepare('SELECT * FROM fa_offers').all(),
+        draft_state: db.prepare('SELECT * FROM draft_state').all()
+    };
+}
+
+function clearAllTables() {
+    db.prepare('DELETE FROM team_links').run();
+    db.prepare('DELETE FROM trades').run();
+    db.prepare('DELETE FROM fa_offers').run();
+    db.prepare('DELETE FROM draft_state').run();
+}
+
+function importData(data) {
+    const transaction = db.transaction((data) => {
+        clearAllTables();
+        
+        const insertTeam = db.prepare('INSERT INTO team_links (discord_id, team_id) VALUES (?, ?)');
+        for (const row of data.team_links) insertTeam.run(row.discord_id, row.team_id);
+
+        const insertTrade = db.prepare('INSERT INTO trades (id, proposer_discord_id, proposer_player, recipient_discord_id, recipient_player, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)');
+        for (const row of data.trades) insertTrade.run(row.id, row.proposer_discord_id, row.proposer_player, row.recipient_discord_id, row.recipient_player, row.status, row.created_at);
+
+        const insertFa = db.prepare('INSERT INTO fa_offers (id, discord_id, team_id, player_name, amount_per_year, years, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+        for (const row of data.fa_offers) insertFa.run(row.id, row.discord_id, row.team_id, row.player_name, row.amount_per_year, row.years, row.status, row.created_at);
+
+        const insertDraft = db.prepare('INSERT INTO draft_state (id, season, current_pick_index) VALUES (?, ?, ?)');
+        for (const row of data.draft_state) insertDraft.run(row.id, row.season, row.current_pick_index);
+    });
+    transaction(data);
+}
+
 module.exports = {
     linkTeam,
     getTeamLink,
@@ -142,5 +178,8 @@ module.exports = {
     closeOtherOffersForPlayer,
     getDraftState,
     setDraftState,
-    advancePick
+    advancePick,
+    getAllData,
+    clearAllTables,
+    importData
 };
