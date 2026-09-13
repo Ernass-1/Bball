@@ -37,7 +37,12 @@ A Discord bot base for managing Basketball GM leagues.
 
 *   **Command Registration**: The bot automatically registers all slash commands on startup. You do not need to run a separate script. If you are developing, setting `GUILD_ID` in your `.env` file is recommended so that changes appear instantly on your test server. You can still run `node deploy-commands.js` manually if you need to force a refresh without restarting the bot.
 
+*   **/team list**: Displays a list of all teams in the league, including their full name, abbreviation, and numeric ID.
+
 *   **/team claim [team_name]**: Claim a franchise. You can use the full name (e.g., "Los Angeles Lakers"), short name ("Lakers"), abbreviation ("LAL"), or numeric ID.
+
+*   **/team setuproles**: (Commissioner only) Creates Discord roles for every team in the league based on the active save file.
+    *   **Note**: Ensure the bot's role is positioned higher than the team roles it creates in your server's role hierarchy, otherwise it will not be able to assign them to users.
 
 *   **/trade propose [recipient] [your_player] [their_player]**: Propose a trade. The bot enforces a salary matching rule: a team can only take on incoming salary if it is less than or equal to 125% of the outgoing salary plus $100,000.
 

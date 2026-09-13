@@ -36,6 +36,12 @@ db.exec(`
     season INTEGER NOT NULL,
     current_pick_index INTEGER NOT NULL DEFAULT 0
   );
+
+  CREATE TABLE IF NOT EXISTS team_roles (
+    team_id INTEGER PRIMARY KEY,
+    role_id TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 function linkTeam(discordId, teamId) {
@@ -125,13 +131,30 @@ function advancePick() {
     return stmt.run();
 }
 
+// Team Roles
+function upsertTeamRole(teamId, roleId) {
+    const stmt = db.prepare('INSERT OR REPLACE INTO team_roles (team_id, role_id) VALUES (?, ?)');
+    return stmt.run(teamId, roleId);
+}
+
+function getRoleForTeam(teamId) {
+    const stmt = db.prepare('SELECT role_id FROM team_roles WHERE team_id = ?');
+    return stmt.get(teamId);
+}
+
+function getAllTeamRoles() {
+    const stmt = db.prepare('SELECT * FROM team_roles');
+    return stmt.all();
+}
+
 // Backup/Restore helpers
 function getAllData() {
     return {
         team_links: db.prepare('SELECT * FROM team_links').all(),
         trades: db.prepare('SELECT * FROM trades').all(),
         fa_offers: db.prepare('SELECT * FROM fa_offers').all(),
-        draft_state: db.prepare('SELECT * FROM draft_state').all()
+        draft_state: db.prepare('SELECT * FROM draft_state').all(),
+        team_roles: db.prepare('SELECT * FROM team_roles').all()
     };
 }
 
@@ -140,6 +163,7 @@ function clearAllTables() {
     db.prepare('DELETE FROM trades').run();
     db.prepare('DELETE FROM fa_offers').run();
     db.prepare('DELETE FROM draft_state').run();
+    db.prepare('DELETE FROM team_roles').run();
 }
 
 function importData(data) {
@@ -157,6 +181,9 @@ function importData(data) {
 
         const insertDraft = db.prepare('INSERT INTO draft_state (id, season, current_pick_index) VALUES (?, ?, ?)');
         for (const row of data.draft_state) insertDraft.run(row.id, row.season, row.current_pick_index);
+
+        const insertRole = db.prepare('INSERT INTO team_roles (team_id, role_id) VALUES (?, ?)');
+        for (const row of data.team_roles) insertRole.run(row.team_id, row.role_id);
     });
     transaction(data);
 }
@@ -179,6 +206,9 @@ module.exports = {
     getDraftState,
     setDraftState,
     advancePick,
+    upsertTeamRole,
+    getRoleForTeam,
+    getAllTeamRoles,
     getAllData,
     clearAllTables,
     importData
