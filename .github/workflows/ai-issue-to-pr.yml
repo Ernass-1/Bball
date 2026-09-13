@@ -88,7 +88,17 @@ jobs:
       - name: Run Aider against Gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          AIDER_MODEL: ${{ vars.AIDER_MODEL || 'gemini/gemini-3.1-pro-preview' }}
+          # AIDER_MODELS: comma-separated fallback chain, tried in order.
+          # Each Gemini model has its own free-tier quota bucket, so if one
+          # is rate-limited the script automatically moves to the next.
+          # Left empty here on purpose when no repo variable is set — the
+          # script itself supplies the default list; see its comments.
+          # Override by setting an AIDER_MODELS repo *variable* with your
+          # own comma-separated list.
+          AIDER_MODELS: ${{ vars.AIDER_MODELS }}
+          # Legacy: set the AIDER_MODEL (singular) repo variable instead if
+          # you want to pin exactly one model with no fallback.
+          AIDER_MODEL: ${{ vars.AIDER_MODEL }}
         run: bash scripts/ai_issue_handler.sh run
 
       - name: Push branch and open pull request
