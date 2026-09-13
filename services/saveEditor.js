@@ -3,6 +3,13 @@ const path = require('node:path');
 
 const ACTIVE_SAVE_PATH = path.join(__dirname, '..', 'data', 'active_save.json');
 
+function ensureDirectoryExists(filePath) {
+    const dirname = path.dirname(filePath);
+    if (!fs.existsSync(dirname)) {
+        fs.mkdirSync(dirname, { recursive: true });
+    }
+}
+
 function getActiveSavePath() {
     return ACTIVE_SAVE_PATH;
 }
@@ -209,6 +216,7 @@ function resolveTeamId(save, input) {
 
 function saveSaveFile(save, path) {
     try {
+        ensureDirectoryExists(path);
         const data = JSON.stringify(save);
         fs.writeFileSync(path, data, 'utf8');
     } catch (error) {
@@ -229,5 +237,6 @@ module.exports = {
     validateTradeSalaries,
     getDraftProspects,
     getPickOrder,
-    draftPlayer
+    draftPlayer,
+    ensureDirectoryExists
 };

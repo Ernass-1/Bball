@@ -24,7 +24,7 @@ A Discord bot base for managing Basketball GM leagues.
     *   `BACKUP_INTERVAL_MINUTES`: How often to auto-backup (default 5).
 
 3.  **Data Storage & Persistence:**
-    *   The bot stores the current league state in `data/active_save.json`.
+    *   The bot stores the current league state in `data/active_save.json`. This directory and file are managed automatically by the bot at runtime.
     *   **GitHub Backup Mechanism**: To protect against filesystem wipes (common on platforms like Render), the bot automatically backs up its database and save file to a dedicated GitHub branch.
         *   **Restore**: On startup, the bot clones the configured branch and restores the database and save file.
         *   **Backup**: The bot periodically pushes changes to GitHub.

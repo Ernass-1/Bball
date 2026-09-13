@@ -4,6 +4,7 @@ const path = require('node:path');
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
 const { restoreFromGitHub, backupToGitHub } = require('./services/dataBackup');
 const { registerCommands } = require('./deploy-commands');
+const { ensureDirectoryExists, getActiveSavePath } = require('./services/saveEditor');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -33,6 +34,7 @@ for (const file of eventFiles) {
 }
 
 // Initialize Backup System
+ensureDirectoryExists(getActiveSavePath());
 restoreFromGitHub();
 const backupInterval = parseInt(process.env.BACKUP_INTERVAL_MINUTES) || 5;
 setInterval(backupToGitHub, backupInterval * 60 * 1000);
