@@ -42,6 +42,12 @@ db.exec(`
     role_id TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS bot_config (
+    config_key TEXT PRIMARY KEY,
+    config_value TEXT NOT NULL,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 function linkTeam(discordId, teamId) {
@@ -147,6 +153,18 @@ function getAllTeamRoles() {
     return stmt.all();
 }
 
+// Config
+function setConfig(key, value) {
+    const stmt = db.prepare('INSERT OR REPLACE INTO bot_config (config_key, config_value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)');
+    return stmt.run(key, value);
+}
+
+function getConfig(key) {
+    const stmt = db.prepare('SELECT config_value FROM bot_config WHERE config_key = ?');
+    const row = stmt.get(key);
+    return row ? row.config_value : null;
+}
+
 // Backup/Restore helpers
 function getAllData() {
     return {
@@ -154,7 +172,8 @@ function getAllData() {
         trades: db.prepare('SELECT * FROM trades').all(),
         fa_offers: db.prepare('SELECT * FROM fa_offers').all(),
         draft_state: db.prepare('SELECT * FROM draft_state').all(),
-        team_roles: db.prepare('SELECT * FROM team_roles').all()
+        team_roles: db.prepare('SELECT * FROM team_roles').all(),
+        bot_config: db.prepare('SELECT * FROM bot_config').all()
     };
 }
 
@@ -164,6 +183,7 @@ function clearAllTables() {
     db.prepare('DELETE FROM fa_offers').run();
     db.prepare('DELETE FROM draft_state').run();
     db.prepare('DELETE FROM team_roles').run();
+    db.prepare('DELETE FROM bot_config').run();
 }
 
 function importData(data) {
@@ -179,11 +199,14 @@ function importData(data) {
         const insertFa = db.prepare('INSERT INTO fa_offers (id, discord_id, team_id, player_name, amount_per_year, years, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
         for (const row of data.fa_offers) insertFa.run(row.id, row.discord_id, row.team_id, row.player_name, row.amount_per_year, row.years, row.status, row.created_at);
 
-        const insertDraft = db.prepare('INSERT INTO draft_state (id, season, current_pick_index) VALUES (?, ?, ?)');
+        const insertDraft = db.prepare('INSERT INTO draft_state (id, season, current_pick_index) VALUES (?, ?)');
         for (const row of data.draft_state) insertDraft.run(row.id, row.season, row.current_pick_index);
 
         const insertRole = db.prepare('INSERT INTO team_roles (team_id, role_id) VALUES (?, ?)');
         for (const row of data.team_roles) insertRole.run(row.team_id, row.role_id);
+
+        const insertConfig = db.prepare('INSERT INTO bot_config (config_key, config_value, updated_at) VALUES (?, ?, ?)');
+        for (const row of data.bot_config) insertConfig.run(row.config_key, row.config_value, row.updated_at);
     });
     transaction(data);
 }
@@ -209,6 +232,8 @@ module.exports = {
     upsertTeamRole,
     getRoleForTeam,
     getAllTeamRoles,
+    setConfig,
+    getConfig,
     getAllData,
     clearAllTables,
     importData
