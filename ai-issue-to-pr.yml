@@ -1,0 +1,99 @@
+name: AI Issue-to-PR (Aider + Gemini)
+
+# --------------------------------------------------------------------------
+# What this does
+# --------------------------------------------------------------------------
+# 1. Someone opens a GitHub issue and adds the "ai-task" label (or opens the
+#    issue with that label already applied).
+# 2. This workflow checks out the repo, installs Aider, and points it at
+#    Google's Gemini API using the issue title + body as the coding brief.
+# 3. If Aider produces changes, they're pushed to a new branch and a pull
+#    request is opened back to the default branch, linked to the issue.
+# 4. If Aider can't make changes, the bot comments on the issue explaining
+#    that instead of failing silently.
+#
+# Setup required (see README-ai-coding-bot.md for details):
+#   - Add a repo secret named GEMINI_API_KEY (from https://aistudio.google.com/app/apikey)
+#   - Create a label called "ai-task" in the repo
+#   - Nothing else — GITHUB_TOKEN is provided automatically by Actions.
+# --------------------------------------------------------------------------
+
+on:
+  issues:
+    types: [opened, labeled]
+
+# Least-privilege token permissions for this workflow only.
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+# If someone spams the "ai-task" label on/off, only the latest run matters.
+concurrency:
+  group: ai-issue-to-pr-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  ai-code:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    # Safety gate — both conditions must hold:
+    #  1. The issue actually has the "ai-task" label attached.
+    #  2. The issue was filed by someone with write access or higher
+    #     (OWNER / MEMBER / COLLABORATOR). This stops random strangers
+    #     on a public repo from triggering a job that spends your Gemini
+    #     quota and pushes branches to your repo.
+    if: |
+      contains(github.event.issue.labels.*.name, 'ai-task') &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.issue.author_association)
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Aider
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade aider-chat
+
+      - name: Configure git identity
+        run: |
+          git config user.name "ai-coding-bot"
+          git config user.email "ai-coding-bot@users.noreply.github.com"
+
+      # NOTE ON SECURITY: the issue title/body is untrusted, attacker-
+      # controlled text (anyone who can open an issue controls it). We pass
+      # it through `env:` here rather than interpolating it directly into
+      # the run: script with ${{ }}. That distinction matters: env values
+      # become plain environment variables, while ${{ }} inside a run:
+      # block is substituted into the script text *before* bash ever sees
+      # it, which would let someone smuggle shell commands into the title.
+      - name: Prepare branch and prompt
+        id: prep
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: bash scripts/ai_issue_handler.sh prepare
+
+      - name: Run Aider against Gemini
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          AIDER_MODEL: ${{ vars.AIDER_MODEL || 'gemini/gemini-2.5-pro' }}
+        run: bash scripts/ai_issue_handler.sh run
+
+      - name: Push branch and open pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: bash scripts/ai_issue_handler.sh finish
