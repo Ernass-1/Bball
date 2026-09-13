@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getTeamLink, createFaOffer, getOpenOffersForPlayer, updateFaOfferStatus, closeOtherOffersForPlayer } = require('../database');
+const { getTeamLink, createFaOffer, getOpenOffersForPlayer, updateFaOfferStatus, closeOtherOffersForPlayer, getRfaStatus, upsertRfaStatus, getTeamOwner } = require('../database');
 const { hasActiveSave, loadSaveFile, getTeam, saveSaveFile, canSignWithinCapRules, getActiveSavePath } = require('../services/saveEditor');
 const { evaluateOffers } = require('../services/faEngine');
 
@@ -84,6 +84,58 @@ module.exports = {
 			const teamDisplayName = resolvedTeam ? `${resolvedTeam.region} ${resolvedTeam.name}` : `Team ID ${teamId}`;
 
 			const offerId = createFaOffer(discordId, teamId, `${player.firstName} ${player.lastName}`, amountPerYear, years);
+
+			// Check RFA status
+			const rfaStatus = getRfaStatus(`${player.firstName} ${player.lastName}`);
+			const isRfa = rfaStatus && (rfaStatus.status === 'restricted' || rfaStatus.status === 'qualifying_offer_pending');
+
+			if (isRfa) {
+				upsertRfaStatus(`${player.firstName} ${player.lastName}`, rfaStatus.original_team_id, 'signed_elsewhere_pending_match', amountPerYear);
+
+				const commishChannelId = process.env.COMMISH_CHANNEL_ID;
+				if (commishChannelId) {
+					const channel = await interaction.client.channels.fetch(commishChannelId).catch(() => null);
+					if (channel) {
+						const embed = new EmbedBuilder()
+							.setTitle('Offer sheet — original team has a window to match')
+							.setDescription(`An offer sheet has been submitted for restricted free agent **${player.firstName} ${player.lastName}** by **${teamDisplayName}**.`)
+							.addFields(
+								{ name: 'New Team', value: teamDisplayName, inline: true },
+								{ name: 'Player', value: `${player.firstName} ${player.lastName}`, inline: true },
+								{ name: 'Offer', value: `$${amountPerYear.toLocaleString()}/yr for ${years} year(s)`, inline: false }
+							)
+							.setColor(0xFFA500)
+							.setTimestamp();
+
+						const row = new ActionRowBuilder().addComponents(
+							new ButtonBuilder()
+								.setCustomId(`rfa_match_${player.firstName} ${player.lastName}`)
+								.setLabel('Match Offer')
+								.setStyle(ButtonStyle.Success),
+							new ButtonBuilder()
+								.setCustomId(`rfa_walk_${player.firstName} ${player.lastName}`)
+								.setLabel('Let Player Walk')
+								.setStyle(ButtonStyle.Danger)
+						);
+
+						await channel.send({ embeds: [embed], components: [row] });
+					}
+				}
+
+				const originalOwnerDiscordId = getTeamOwner(rfaStatus.original_team_id);
+				if (originalOwnerDiscordId) {
+					try {
+						const ownerUser = await interaction.client.users.fetch(originalOwnerDiscordId);
+						if (ownerUser) {
+							await ownerUser.send(`Your restricted free agent **${player.firstName} ${player.lastName}** has received an offer sheet from **${teamDisplayName}** ($${amountPerYear.toLocaleString()}/yr for ${years} yrs). Check the commissioner channel to match or let walk.`);
+						}
+					} catch (err) {
+						// DM failed, ignore
+					}
+				}
+
+				return interaction.reply({ content: `Your offer sheet of $${amountPerYear.toLocaleString()}/yr for ${years} year(s) to RFA ${player.firstName} ${player.lastName} has been submitted and sent to the original team for matching!`, ephemeral: true });
+			}
 
 			const commishChannelId = process.env.COMMISH_CHANNEL_ID;
 			if (commishChannelId) {
