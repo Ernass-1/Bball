@@ -36,6 +36,27 @@ function getPlayer(save, playerId) {
     return save.players.find(p => p.pid === playerId) || null;
 }
 
+function swapPlayers(save, playerNameA, teamIdA, playerNameB, teamIdB) {
+    if (!save.players) {
+        throw new Error("No players found in save file.");
+    }
+
+    const playerA = save.players.find(p => p.firstName + " " + p.lastName === playerNameA && p.tid === teamIdA);
+    const playerB = save.players.find(p => p.firstName + " " + p.lastName === playerNameB && p.tid === teamIdB);
+
+    if (!playerA) {
+        throw new Error(`Player '${playerNameA}' not found on the expected team.`);
+    }
+    if (!playerB) {
+        throw new Error(`Player '${playerNameB}' not found on the expected team.`);
+    }
+
+    playerA.tid = teamIdB;
+    playerB.tid = teamIdA;
+
+    return save;
+}
+
 function resolveTeamId(save, input) {
     if (!save.teams || !Array.isArray(save.teams)) {
         throw new Error("No teams found in save file.");
@@ -94,6 +115,7 @@ module.exports = {
     loadSaveFile,
     getTeam,
     getPlayer,
+    swapPlayers,
     resolveTeamId,
     saveSaveFile,
     getActiveSavePath,
