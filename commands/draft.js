@@ -2,6 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('disc
 const { hasActiveSave, loadSaveFile, getActiveSavePath, getPickOrder, getDraftProspects, getTeam, draftPlayer, saveSaveFile } = require('../services/saveEditor');
 const { setDraftState, getDraftState, advancePick, getTeamLink } = require('../database/index');
 const { isCommissioner, isBotOwner } = require('../utils/permissions');
+const { getTeamChannel } = require('../services/channelHelper');
 
 // In-memory timer tracker.
 // NOTE: This state is in-memory only and does not survive a bot restart.
@@ -96,7 +97,12 @@ module.exports = {
 			subcommand
 				.setName('pick')
 				.setDescription('Select a player for your team')
-				.addStringOption(option => option.setName('player_name').setDescription('The name of the prospect to draft').setRequired(true))),
+				.addStringOption(option => option.setName('player_name').setDescription('The name of the prospect to draft').setRequired(true)))
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('announce-picks')
+				.setDescription('Post draft pick inventory for a season to each team channel')
+				.addIntegerOption(option => option.setName('season').setDescription('The season to announce picks for').setRequired(true))),
 
 	async execute(interaction) {
 		if (!hasActiveSave()) {
@@ -106,6 +112,77 @@ module.exports = {
 		const activeSavePath = getActiveSavePath();
 		const save = loadSaveFile(activeSavePath);
 		const subcommand = interaction.options.getSubcommand();
+
+		if (subcommand === 'announce-picks') {
+			if (!isCommissioner(interaction.member)) {
+				return interaction.reply({ content: "Only commissioners can use this command.", ephemeral: true });
+			}
+
+			const season = interaction.options.getInteger('season');
+			const allPicks = getPickOrder(save, season);
+
+			if (allPicks.length === 0) {
+				return interaction.reply({ content: `No draft picks found for season ${season}.`, ephemeral: true });
+			}
+
+			const picksByTeam = {};
+			allPicks.forEach(pick => {
+				if (!picksByTeam[pick.tid]) picksByTeam[pick.tid] = [];
+				picksByTeam[pick.tid].push(pick);
+			});
+
+			let sentCount = 0;
+			let skippedNoChannelCount = 0;
+			let zeroPicksCount = 0;
+
+			const allTeams = save.teams || [];
+			for (const team of allTeams) {
+				const teamId = team.tid;
+				const teamPicks = picksByTeam[teamId];
+
+				if (!teamPicks || teamPicks.length === 0) {
+					zeroPicksCount++;
+					continue;
+				}
+
+				const channel = getTeamChannel(interaction.client, teamId);
+				if (!channel) {
+					skippedNoChannelCount++;
+					continue;
+				}
+
+				const pickStrings = teamPicks.map(p => {
+					let str = `Round ${p.round}, Pick ${p.pick}`;
+					if (p.originalTid !== teamId) {
+						const originalTeam = getTeam(save, p.originalTid);
+						const abbrev = originalTeam ? originalTeam.abbrev : '???';
+						str += ` (originally ${abbrev})`;
+					}
+					return str;
+				});
+
+				const embed = new EmbedBuilder()
+					.setTitle(`Draft picks for season ${season}`)
+					.setDescription(pickStrings.join('\n'))
+					.setColor(0x0099FF);
+
+				try {
+					await channel.send({ embeds: [embed] });
+					sentCount++;
+				} catch (err) {
+					console.error(`Failed to send picks to channel for team ${teamId}:`, err);
+					skippedNoChannelCount++;
+				}
+			}
+
+			return interaction.reply({
+				content: `Picks announcement summary for ${season}:\n` +
+					`- Messages sent to team channels: ${sentCount}\n` +
+					`- Teams with zero picks: ${zeroPicksCount}\n` +
+					`- Teams skipped (no channel mapping): ${skippedNoChannelCount}`,
+				ephemeral: true
+			});
+		}
 
 		if (subcommand === 'start') {
 			if (!isCommissioner(interaction.member)) {
