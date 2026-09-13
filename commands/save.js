@@ -2,6 +2,7 @@ const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const { loadSaveFile, saveSaveFile, getActiveSavePath, hasActiveSave } = require('../services/saveEditor');
 const fs = require('node:fs');
 const https = require('node:https');
+const { isCommissioner } = require('../utils/permissions');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -21,7 +22,7 @@ module.exports = {
 				.setDescription('Export the current active save file')),
 	async execute(interaction) {
 		if (interaction.options.getSubcommand() === 'upload') {
-			if (!interaction.member.roles.cache.has(process.env.COMMISSIONER_ROLE_ID)) {
+			if (!isCommissioner(interaction.member)) {
 				return interaction.reply({ content: "You don't have permission to do that.", ephemeral: true });
 			}
 

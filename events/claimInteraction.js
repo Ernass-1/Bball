@@ -1,5 +1,6 @@
 const { Events, EmbedBuilder } = require('discord.js');
 const { linkTeamToUser } = require('../database/index.js');
+const { isCommissioner } = require('../utils/permissions.js');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -11,7 +12,7 @@ module.exports = {
 
 		if (!isApprove && !isDeny) return;
 
-		if (!interaction.member.roles.cache.has(process.env.COMMISSIONER_ROLE_ID)) {
+		if (!isCommissioner(interaction.member)) {
 			return interaction.reply({ content: "You don't have permission to do that.", ephemeral: true });
 		}
 

@@ -15,6 +15,7 @@ A Discord bot base for managing Basketball GM leagues.
     *   `GUILD_ID`: (Optional) The ID of your specific Discord server. If set, commands will register instantly to this server for testing. If left blank, commands will register globally (which can take up to an hour to propagate).
     *   `COMMISH_CHANNEL_ID`: The ID of the channel where claim requests and free agency offers are sent.
     *   `COMMISSIONER_ROLE_ID`: The ID of the role allowed to approve/deny claims, upload save files, and resolve free agency offers.
+    *   `BOT_OWNER_DISCORD_ID`: (Optional) The Discord user ID of the bot owner. This user bypasses all role and team-ownership checks. Useful for testing and administration. If left unset, normal permission checks apply to everyone.
     *   `DRAFT_CHANNEL_ID`: The ID of the channel where draft clock warnings and auto-pick announcements are posted.
     *   `DRAFT_PICK_SECONDS`: The countdown length per pick (default 90 seconds).
     *   `GITHUB_TOKEN`: A GitHub Personal Access Token with 'repo' scope (read/write).
