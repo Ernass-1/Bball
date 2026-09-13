@@ -92,7 +92,7 @@ EOF
 # ---------------------------------------------------------------------------
 stage_run() {
   : "${GEMINI_API_KEY:?GEMINI_API_KEY secret is not set}"
-  local model="${AIDER_MODEL:-gemini/gemini-2.5-pro}"
+  local model="${AIDER_MODEL:-gemini/gemini-3.1-pro-preview}"
 
   echo "Running Aider with model: ${model}"
 
