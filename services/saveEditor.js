@@ -278,6 +278,13 @@ function getExpiringContracts(save, teamId) {
         }));
 }
 
+function isRfaEligible(player) {
+    // RFA eligibility logic:
+    // Typically players with < 4 years of service are RFA.
+    // We check if they are on a rookie contract (yearsWithTeam < 4).
+    return player.yearsWithTeam < 4;
+}
+
 module.exports = {
     loadSaveFile,
     getTeam,
@@ -295,5 +302,6 @@ module.exports = {
     ensureDirectoryExists,
     validateAndStoreSave,
     getExpiringContracts,
-    getCurrentSeason
+    getCurrentSeason,
+    isRfaEligible
 };

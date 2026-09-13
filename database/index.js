@@ -54,6 +54,11 @@ db.exec(`
     config_value TEXT NOT NULL,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS rfa_status (
+    player_id INTEGER PRIMARY KEY,
+    status TEXT NOT NULL
+  );
 `);
 
 function linkTeam(discordId, teamId) {
@@ -187,6 +192,18 @@ function getConfig(key) {
     return row ? row.config_value : null;
 }
 
+// RFA Status
+function getRfaStatus(playerId) {
+    const stmt = db.prepare('SELECT status FROM rfa_status WHERE player_id = ?');
+    const row = stmt.get(playerId);
+    return row ? row.status : 'not yet qualified';
+}
+
+function setRfaStatus(playerId, status) {
+    const stmt = db.prepare('INSERT OR REPLACE INTO rfa_status (player_id, status) VALUES (?, ?)');
+    return stmt.run(playerId, status);
+}
+
 // Backup/Restore helpers
 function getAllData() {
     return {
@@ -196,7 +213,8 @@ function getAllData() {
         draft_state: db.prepare('SELECT * FROM draft_state').all(),
         team_roles: db.prepare('SELECT * FROM team_roles').all(),
         team_channels: db.prepare('SELECT * FROM team_channels').all(),
-        bot_config: db.prepare('SELECT * FROM bot_config').all()
+        bot_config: db.prepare('SELECT * FROM bot_config').all(),
+        rfa_status: db.prepare('SELECT * FROM rfa_status').all()
     };
 }
 
@@ -208,6 +226,7 @@ function clearAllTables() {
     db.prepare('DELETE FROM team_roles').run();
     db.prepare('DELETE FROM team_channels').run();
     db.prepare('DELETE FROM bot_config').run();
+    db.prepare('DELETE FROM rfa_status').run();
 }
 
 function importData(data) {
@@ -234,6 +253,9 @@ function importData(data) {
 
         const insertConfig = db.prepare('INSERT INTO bot_config (config_key, config_value, updated_at) VALUES (?, ?, ?)');
         for (const row of data.bot_config) insertConfig.run(row.config_key, row.config_value, row.updated_at);
+
+        const insertRfa = db.prepare('INSERT INTO rfa_status (player_id, status) VALUES (?, ?)');
+        for (const row of data.rfa_status) insertRfa.run(row.player_id, row.status);
     });
     transaction(data);
 }
@@ -264,6 +286,8 @@ module.exports = {
     getAllTeamChannels,
     setConfig,
     getConfig,
+    getRfaStatus,
+    setRfaStatus,
     getAllData,
     clearAllTables,
     importData
