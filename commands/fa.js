@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getTeamLink, createFaOffer } = require('../database');
-const { hasActiveSave, loadSaveFile, getTeam } = require('../services/saveEditor');
+const { getTeamLink, createFaOffer, getOpenOffersForPlayer, updateFaOfferStatus, closeOtherOffersForPlayer } = require('../database');
+const { hasActiveSave, loadSaveFile, getTeam, saveSaveFile } = require('../services/saveEditor');
+const { evaluateOffers } = require('../services/faEngine');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -21,13 +22,21 @@ module.exports = {
 				.addIntegerOption(option =>
 					option.setName('years')
 						.setDescription('Number of years')
+						.setRequired(true)))
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('close')
+				.setDescription('Close bidding and automatically sign a free agent')
+				.addStringOption(option =>
+					option.setName('player_name')
+						.setDescription('The full name of the free agent')
 						.setRequired(true))),
 	async execute(interaction) {
-		if (interaction.options.getSubcommand() === 'offer') {
-			if (!hasActiveSave()) {
-				return interaction.reply({ content: "No active save file has been uploaded yet — ask your commissioner to upload one using `/save upload`.", ephemeral: true });
-			}
+		if (!hasActiveSave()) {
+			return interaction.reply({ content: "No active save file has been uploaded yet — ask your commissioner to upload one using `/save upload`.", ephemeral: true });
+		}
 
+		if (interaction.options.getSubcommand() === 'offer') {
 			const discordId = interaction.user.id;
 			const teamLink = getTeamLink(discordId);
 
@@ -95,6 +104,55 @@ module.exports = {
 			}
 
 			return interaction.reply({ content: `Your offer of $${amountPerYear.toLocaleString()}/yr for ${years} year(s) to ${player.firstName} ${player.lastName} has been submitted!`, ephemeral: true });
+		}
+
+		if (interaction.options.getSubcommand() === 'close') {
+			if (!interaction.member.roles.cache.has(process.env.COMMISSIONER_ROLE_ID)) {
+				return interaction.reply({ content: "You don't have permission to do that.", ephemeral: true });
+			}
+
+			const playerName = interaction.options.getString('player_name');
+			const offers = getOpenOffersForPlayer(playerName);
+
+			if (!offers || offers.length === 0) {
+				return interaction.reply({ content: `There are no open offers for '${playerName}'.`, ephemeral: true });
+			}
+
+			let save;
+			try {
+				save = loadSaveFile();
+			} catch (error) {
+				return interaction.reply({ content: `Error loading save file: ${error.message}`, ephemeral: true });
+			}
+
+			const winningOffer = evaluateOffers(save, offers);
+
+			if (!winningOffer) {
+				return interaction.reply({ content: "Failed to evaluate offers.", ephemeral: true });
+			}
+
+			// Update player in save
+			const player = save.players.find(p => `${p.firstName} ${p.lastName}`.toLowerCase() === playerName.toLowerCase());
+			if (!player) {
+				return interaction.reply({ content: `Could not find player '${playerName}' in the save file.`, ephemeral: true });
+			}
+
+			player.tid = winningOffer.team_id;
+			saveSaveFile(save, process.env.ACTIVE_SAVE_PATH);
+
+			// Update DB
+			updateFaOfferStatus(winningOffer.id, 'signed');
+			closeOtherOffersForPlayer(playerName, winningOffer.id);
+
+			const team = getTeam(save, winningOffer.team_id);
+			const teamName = team ? `${team.region} ${team.name}` : `Team ID ${winningOffer.team_id}`;
+
+			const embed = new EmbedBuilder()
+				.setTitle(`Free Agent Signed: ${playerName}`)
+				.setDescription(`**${teamName}** has signed ${playerName} to a ${winningOffer.years}-year deal worth $${winningOffer.amount_per_year.toLocaleString()} per year.`)
+				.setFooter({ text: `Evaluation: Highest total value weighted by team win percentage among ${offers.length} offers.` });
+
+			return interaction.reply({ embeds: [embed] });
 		}
 	},
 };
