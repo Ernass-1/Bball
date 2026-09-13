@@ -108,6 +108,8 @@ stage_run() {
   local attempt_log="/tmp/aider_attempt.log"
   local model=""
   local aider_exit=1
+  local hard_error=0    # set only for a genuine, non-rate-limit failure
+  local made_changes=0
 
   for raw_model in "${MODEL_LIST[@]}"; do
     # trim whitespace in case the list was written as "a, b, c"
@@ -138,21 +140,39 @@ stage_run() {
 
     cat "${attempt_log}" | tee -a "${LOG_FILE}"
 
-    if [[ ${aider_exit} -eq 0 ]]; then
-      echo "Model ${model} completed without error." | tee -a "${LOG_FILE}"
+    # Judge success by an actual commit, not by exit code. A model can
+    # exit 0 while producing zero edits — e.g. weaker/faster models
+    # sometimes reason about a change without ever emitting a valid,
+    # applicable edit block. That's not an error Aider reports, so exit
+    # code alone would wrongly make us stop here instead of trying the
+    # next model in the list.
+    local current_head
+    current_head="$(git rev-parse HEAD)"
+    if [[ "${current_head}" != "${BASE_SHA}" ]]; then
+      echo "Model ${model} produced a commit." | tee -a "${LOG_FILE}"
+      made_changes=1
       break
     fi
 
-    if grep -qiE "RateLimitError|RESOURCE_EXHAUSTED|rate.?limit" "${attempt_log}"; then
+    if [[ ${aider_exit} -ne 0 ]] && grep -qiE "RateLimitError|RESOURCE_EXHAUSTED|rate.?limit" "${attempt_log}"; then
       echo "Model ${model} was rate-limited — trying the next model in the fallback list, if any." | tee -a "${LOG_FILE}"
       continue
-    else
+    fi
+
+    if [[ ${aider_exit} -ne 0 ]]; then
       echo "Model ${model} failed for a reason other than rate limiting — not trying further fallback models, since retrying elsewhere wouldn't help." | tee -a "${LOG_FILE}"
+      hard_error=1
       break
     fi
+
+    # Exit 0, but no commit: this model chose not to make an edit, or
+    # produced one that didn't apply cleanly. Try the next model instead
+    # of accepting that as final — a different model may still handle the
+    # same well-scoped issue successfully.
+    echo "Model ${model} finished without making any changes — trying the next model in the list, if any." | tee -a "${LOG_FILE}"
   done
 
-  if [[ ${aider_exit} -ne 0 ]]; then
+  if [[ ${made_changes} -eq 0 && ${hard_error} -eq 1 ]]; then
     echo "AIDER_FAILED=1" >> "${GITHUB_ENV}"
     echo "Aider exited with status ${aider_exit} (last model tried: ${model})."
     # Don't hard-fail the step here — let stage_finish decide what to tell
@@ -277,4 +297,3 @@ case "${STAGE}" in
     exit 1
     ;;
 esac
-
