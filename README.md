@@ -46,6 +46,10 @@ A Discord bot base for managing Basketball GM leagues.
 *   **/team setuproles**: (Commissioner only) Creates Discord roles for every team in the league based on the active save file.
     *   **Note**: Ensure the bot's role is positioned higher than the team roles it creates in your server's role hierarchy, otherwise it will not be able to assign them to users.
 
+*   **/team setupchannels**: (Commissioner only) Creates a "Team Channels" category and a private text channel for every team that has a role assigned.
+    *   **Access Control**: Channels are created with permission overwrites so that only the team's role and the commissioner role can view them. Access is automatically managed via Discord's role system.
+    *   **Note**: Future features will post automated updates (e.g., contract expirations, RFA status, draft picks) into these channels.
+
 *   **/trade propose [recipient] [your_player] [their_player]**: Propose a trade. The bot enforces a salary matching rule: a team can only take on incoming salary if it is less than or equal to 125% of the outgoing salary plus $100,000.
 
 *   **/fa offer [player_name] [amount_per_year] [years]**: Submit a contract offer to a free agent. Commissioners will receive the offer in the commissioner channel with a button to sign the player to that offer.
