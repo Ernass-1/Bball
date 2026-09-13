@@ -1,7 +1,5 @@
 const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
-const { loadSaveFile, saveSaveFile, getActiveSavePath, hasActiveSave, ensureDirectoryExists } = require('../services/saveEditor');
-const fs = require('node:fs');
-const https = require('node:https');
+const { getActiveSavePath, hasActiveSave, validateAndStoreSave } = require('../services/saveEditor');
 const { isCommissioner } = require('../utils/permissions');
 
 module.exports = {
@@ -14,8 +12,10 @@ module.exports = {
 				.setDescription('Upload a new BBGM save file')
 				.addAttachmentOption(option => 
 					option.setName('file')
-						.setDescription('The BBGM .json export')
-						.setRequired(true)))
+						.setDescription('The BBGM .json or .json.gz export'))
+				.addStringOption(option =>
+					option.setName('url')
+						.setDescription('Direct download URL for a BBGM save')))
 		.addSubcommand(subcommand =>
 			subcommand
 				.setName('export')
@@ -27,50 +27,54 @@ module.exports = {
 			}
 
 			const attachment = interaction.options.getAttachment('file');
-			
-			if (!attachment.contentType || !attachment.contentType.includes('json')) {
-				return interaction.reply({ content: 'Please upload a valid JSON file.', ephemeral: true });
+			const url = interaction.options.getString('url');
+
+			if ((!attachment && !url) || (attachment && url)) {
+				return interaction.reply({ content: 'Please provide exactly one of: a file attachment OR a URL.', ephemeral: true });
 			}
 
 			await interaction.deferReply({ ephemeral: true });
 
-			const tempPath = `./data/temp_${Date.now()}.json`;
-			ensureDirectoryExists(tempPath);
-			const file = fs.createWriteStream(tempPath);
+			try {
+				let buffer;
 
-			file.on('error', async (err) => {
-				console.error('File stream error during upload:', err);
-				file.close();
-				if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
-				return interaction.editReply('Something went wrong saving that file — please try again.');
-			});
+				if (attachment) {
+					const response = await fetch(attachment.url);
+					if (!response.ok) throw new Error(`Failed to download attachment: ${response.statusText}`);
+					buffer = Buffer.from(await response.arrayBuffer());
+				} else {
+					if (!url.startsWith('http://') && !url.startsWith('https://')) {
+						return interaction.editReply('Please provide a direct http(s) download link.');
+					}
 
-			https.get(attachment.url, (response) => {
-				response.pipe(file);
-				file.on('finish', () => {
-					file.close(async () => {
-						try {
-							const save = loadSaveFile(tempPath);
-							
-							if (!Array.isArray(save.teams) || !Array.isArray(save.players)) {
-								fs.unlinkSync(tempPath);
-								return interaction.editReply('Invalid BBGM save: Missing teams or players array.');
-							}
+					const controller = new AbortController();
+					const timeout = setTimeout(() => controller.abort(), 30000);
 
-							saveSaveFile(save, getActiveSavePath());
-							fs.unlinkSync(tempPath);
+					try {
+						const response = await fetch(url, { signal: controller.signal });
+						clearTimeout(timeout);
 
-							await interaction.editReply(`Success! Active save updated. Found ${save.teams.length} teams and ${save.players.length} players.`);
-						} catch (error) {
-							if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
-							await interaction.editReply(`Error processing file: ${error.message}`);
+						if (!response.ok) throw new Error(`Failed to download from URL: ${response.statusText}`);
+
+						const contentLength = response.headers.get('Content-Length');
+						if (contentLength && parseInt(contentLength, 10) > 100 * 1024 * 1024) {
+							return interaction.editReply('The file at that URL is too large (over 100MB).');
 						}
-					});
-				});
-			}).on('error', async (err) => {
-				if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
-				await interaction.editReply(`Error downloading file: ${err.message}`);
-			});
+
+						buffer = Buffer.from(await response.arrayBuffer());
+					} catch (err) {
+						clearTimeout(timeout);
+						if (err.name === 'AbortError') throw new Error('Download timed out after 30 seconds.');
+						throw err;
+					}
+				}
+
+				const result = validateAndStoreSave(buffer);
+				await interaction.editReply(`Success! Active save updated. Found ${result.teamCount} teams and ${result.playerCount} players.`);
+
+			} catch (error) {
+				await interaction.editReply(`Error: ${error.message}`);
+			}
 		} else if (interaction.options.getSubcommand() === 'export') {
 			if (!hasActiveSave()) {
 				return interaction.reply({ content: 'No active save file has been uploaded yet.', ephemeral: true });
