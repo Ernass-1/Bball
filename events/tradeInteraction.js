@@ -1,5 +1,6 @@
 const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { getTrade, updateTradeStatus } = require('../database/index.js');
+const { isCommissioner, isBotOwner } = require('../utils/permissions.js');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -22,7 +23,7 @@ module.exports = {
 
 		// Handle Accept/Reject (Recipient only)
 		if (isAccept || isReject) {
-			if (interaction.user.id !== trade.recipient_discord_id) {
+			if (interaction.user.id !== trade.recipient_discord_id && !isBotOwner(interaction.user.id)) {
 				return interaction.reply({ content: "This trade isn't for you to respond to.", ephemeral: true });
 			}
 
@@ -64,7 +65,7 @@ module.exports = {
 
 		// Handle Approve/Deny (Commissioners only)
 		if (isApprove || isDeny) {
-			if (!interaction.member.roles.cache.has(process.env.COMMISSIONER_ROLE_ID)) {
+			if (!isCommissioner(interaction.member)) {
 				return interaction.reply({ content: "You don't have permission to do that.", ephemeral: true });
 			}
 

@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { backupToGitHub } = require('../services/dataBackup');
+const { isCommissioner } = require('../utils/permissions');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -10,7 +11,7 @@ module.exports = {
 				.setName('backup')
 				.setDescription('Force a manual backup to GitHub')),
 	async execute(interaction) {
-		if (!interaction.member.roles.cache.has(process.env.COMMISSIONER_ROLE_ID)) {
+		if (!isCommissioner(interaction.member)) {
 			return interaction.reply({ content: "You don't have permission to do that.", ephemeral: true });
 		}
 

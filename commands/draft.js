@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const { hasActiveSave, loadSaveFile, getActiveSavePath, getPickOrder, getDraftProspects, getTeam, draftPlayer, saveSaveFile } = require('../services/saveEditor');
 const { setDraftState, getDraftState, advancePick, getTeamLink } = require('../database/index');
+const { isCommissioner, isBotOwner } = require('../utils/permissions');
 
 // In-memory timer tracker.
 // NOTE: This state is in-memory only and does not survive a bot restart.
@@ -107,7 +108,7 @@ module.exports = {
 		const subcommand = interaction.options.getSubcommand();
 
 		if (subcommand === 'start') {
-			if (!interaction.member.roles.cache.has(process.env.COMMISSIONER_ROLE_ID)) {
+			if (!isCommissioner(interaction.member)) {
 				return interaction.reply({ content: "Only commissioners can start the draft.", ephemeral: true });
 			}
 
@@ -177,7 +178,7 @@ module.exports = {
 			const currentPick = picks[draftState.current_pick_index];
 			const owner = getTeamLink(interaction.user.id);
 
-			if (!owner || owner.team_id !== currentPick.tid) {
+			if (!isBotOwner(interaction.user.id) && (!owner || owner.team_id !== currentPick.tid)) {
 				const team = getTeam(save, currentPick.tid);
 				const teamName = team ? `${team.region} ${team.name}` : 'Unknown Team';
 				return interaction.reply({ content: `It's not your turn — it's **${teamName}**'s pick.`, ephemeral: true });

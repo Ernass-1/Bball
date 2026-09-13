@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { getTeamLink, createTrade } = require('../database/index.js');
 const { hasActiveSave, loadSaveFile, getActiveSavePath, getPlayerSalary, validateTradeSalaries } = require('../services/saveEditor.js');
+const { isBotOwner } = require('../utils/permissions.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -24,10 +25,10 @@ module.exports = {
 			const proposerTeam = getTeamLink(proposerId);
 			const recipientTeam = getTeamLink(recipientId);
 
-			if (!proposerTeam) {
+			if (!proposerTeam && !isBotOwner(proposerId)) {
 				return interaction.reply({ content: 'You must claim a team before proposing trades.', ephemeral: true });
 			}
-			if (!recipientTeam) {
+			if (!recipientTeam && !isBotOwner(recipientId)) {
 				return interaction.reply({ content: 'The recipient does not have a claimed team.', ephemeral: true });
 			}
 
@@ -36,8 +37,8 @@ module.exports = {
 			}
 
 			const save = loadSaveFile(getActiveSavePath());
-			const proposerSalary = getPlayerSalary(save, yourPlayer, proposerTeam.team_id);
-			const recipientSalary = getPlayerSalary(save, theirPlayer, recipientTeam.team_id);
+			const proposerSalary = getPlayerSalary(save, yourPlayer, proposerTeam ? proposerTeam.team_id : null);
+			const recipientSalary = getPlayerSalary(save, theirPlayer, recipientTeam ? recipientTeam.team_id : null);
 
 			if (proposerSalary === null) {
 				return interaction.reply({ content: `Couldn't find '${yourPlayer}' on your team's roster.`, ephemeral: true });
