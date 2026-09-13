@@ -19,6 +19,11 @@ A Discord bot base for managing Basketball GM leagues.
     *   The bot stores the current league state in `data/active_save.json`. This directory is ignored by git to protect league data.
     *   Use `/save upload` (Commissioner only) to set the active save.
     *   Use `/save export` to download the current state.
+    *   Commands like `/team claim` require an active save file to be uploaded first.
+
+## Usage
+
+*   **/team claim [team_name]**: Claim a franchise. You can use the full name (e.g., "Los Angeles Lakers"), short name ("Lakers"), abbreviation ("LAL"), or numeric ID.
 
 4.  **Deploy Commands:**
     Run this once (or whenever you add new commands) to register slash commands:
