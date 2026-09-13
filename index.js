@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
 const { restoreFromGitHub, backupToGitHub } = require('./services/dataBackup');
+const { registerCommands } = require('./deploy-commands');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -36,4 +37,12 @@ restoreFromGitHub();
 const backupInterval = parseInt(process.env.BACKUP_INTERVAL_MINUTES) || 5;
 setInterval(backupToGitHub, backupInterval * 60 * 1000);
 
-client.login(process.env.DISCORD_TOKEN);
+// Register commands and start bot
+(async () => {
+	try {
+		await registerCommands();
+	} catch (error) {
+		console.error('Failed to register commands:', error);
+	}
+	client.login(process.env.DISCORD_TOKEN);
+})();
