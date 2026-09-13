@@ -36,6 +36,45 @@ function getPlayer(save, playerId) {
     return save.players.find(p => p.pid === playerId) || null;
 }
 
+function getPlayerSalary(save, playerName, teamId) {
+    if (!save.players) return null;
+
+    // BBGM stores salaries in an array 'salaries'. 
+    // The current season's salary is the first entry in the array for the current year.
+    // We use .amount from the first element as it represents the current year's cap hit.
+    const player = save.players.find(p => p.firstName + " " + p.lastName === playerName && p.tid === teamId);
+    
+    if (!player || !player.salaries || player.salaries.length === 0) {
+        return null;
+    }
+
+    return player.salaries[0].amount;
+}
+
+function validateTradeSalaries(save, proposerSalary, recipientSalary) {
+    // Standard NBA-style rule: incoming <= outgoing * 1.25 + 100k
+    // This check must be run independently for BOTH teams in the trade.
+    
+    const proposerMaxIncoming = proposerSalary * 1.25 + 100000;
+    const recipientMaxIncoming = recipientSalary * 1.25 + 100000;
+
+    if (recipientSalary > proposerMaxIncoming) {
+        return { 
+            legal: false, 
+            reason: `Trade illegal: Proposer is taking back $${recipientSalary.toLocaleString()}, which exceeds their allowed limit of $${proposerMaxIncoming.toLocaleString()} (125% + $100k).` 
+        };
+    }
+
+    if (proposerSalary > recipientMaxIncoming) {
+        return { 
+            legal: false, 
+            reason: `Trade illegal: Recipient is taking back $${proposerSalary.toLocaleString()}, which exceeds their allowed limit of $${recipientMaxIncoming.toLocaleString()} (125% + $100k).` 
+        };
+    }
+
+    return { legal: true };
+}
+
 function swapPlayers(save, playerNameA, teamIdA, playerNameB, teamIdB) {
     if (!save.players) {
         throw new Error("No players found in save file.");
@@ -119,5 +158,7 @@ module.exports = {
     resolveTeamId,
     saveSaveFile,
     getActiveSavePath,
-    hasActiveSave
+    hasActiveSave,
+    getPlayerSalary,
+    validateTradeSalaries
 };

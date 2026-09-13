@@ -25,6 +25,8 @@ A Discord bot base for managing Basketball GM leagues.
 
 *   **/team claim [team_name]**: Claim a franchise. You can use the full name (e.g., "Los Angeles Lakers"), short name ("Lakers"), abbreviation ("LAL"), or numeric ID.
 
+*   **/trade propose [recipient] [your_player] [their_player]**: Propose a trade. The bot enforces a salary matching rule: a team can only take on incoming salary if it is less than or equal to 125% of the outgoing salary plus $100,000.
+
 4.  **Deploy Commands:**
     Run this once (or whenever you add new commands) to register slash commands:
     ```bash
