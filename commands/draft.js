@@ -2,6 +2,82 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('disc
 const { hasActiveSave, loadSaveFile, getActiveSavePath, getPickOrder, getDraftProspects, getTeam, draftPlayer, saveSaveFile } = require('../services/saveEditor');
 const { setDraftState, getDraftState, advancePick, getTeamLink } = require('../database/index');
 
+// In-memory timer tracker.
+// NOTE: This state is in-memory only and does not survive a bot restart.
+// If the bot restarts mid-draft, the commissioner will need to re-run /draft start for the current season to resume timing.
+let activeTimer = null;
+
+async function startPickTimer(client) {
+	// Clear any existing timer first
+	if (activeTimer) {
+		clearTimeout(activeTimer);
+		activeTimer = null;
+	}
+
+	const draftState = getDraftState();
+	if (!draftState) return; // Draft not active
+
+	const activeSavePath = getActiveSavePath();
+	const save = loadSaveFile(activeSavePath);
+	const picks = getPickOrder(save, draftState.season);
+
+	if (draftState.current_pick_index >= picks.length) return; // Draft complete
+
+	const pickSeconds = parseInt(process.env.DRAFT_PICK_SECONDS) || 90;
+	const channel = await client.channels.fetch(process.env.DRAFT_CHANNEL_ID).catch(() => null);
+
+	if (!channel) {
+		console.error("Draft channel not found or DRAFT_CHANNEL_ID not set.");
+		return;
+	}
+
+	const currentPick = picks[draftState.current_pick_index];
+	const team = getTeam(save, currentPick.tid);
+	const teamName = team ? `${team.region} ${team.name}` : 'Unknown Team';
+
+	// Warning timer
+	if (pickSeconds > 15) {
+		setTimeout(() => {
+			// Check if this is still the same pick
+			const currentState = getDraftState();
+			if (currentState && currentState.current_pick_index === draftState.current_pick_index) {
+				channel.send(`⏰ 15 seconds left for **${teamName}** to make their pick.`);
+			}
+		}, (pickSeconds - 15) * 1000);
+	}
+
+	// Auto-pick timer
+	activeTimer = setTimeout(async () => {
+		// Re-read draft state fresh
+		const currentState = getDraftState();
+		if (!currentState || currentState.current_pick_index !== draftState.current_pick_index) {
+			return; // Pick already happened or state changed
+		}
+
+		// Auto-draft best available
+		const prospects = getDraftProspects(save, draftState.season);
+		if (prospects.length === 0) {
+			channel.send("No prospects available to auto-draft.");
+			return;
+		}
+		const bestProspect = prospects[0];
+		const playerName = `${bestProspect.firstName} ${bestProspect.lastName}`;
+
+		try {
+			const updatedSave = draftPlayer(save, playerName, currentPick.tid, draftState.current_pick_index, draftState.season);
+			saveSaveFile(updatedSave, activeSavePath);
+			advancePick();
+
+			channel.send(`⌛ Time expired — **${teamName}** auto-drafted **${playerName}** (best available).`);
+
+			// Start timer for next pick
+			startPickTimer(client);
+		} catch (error) {
+			channel.send(`Error during auto-draft: ${error.message}`);
+		}
+	}, pickSeconds * 1000);
+}
+
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('draft')
@@ -46,6 +122,9 @@ module.exports = {
 			const firstPick = picks[0];
 			const team = getTeam(save, firstPick.tid);
 			
+			// Start the timer
+			startPickTimer(interaction.client);
+
 			return interaction.reply({ 
 				content: `📢 **The ${season} Draft has officially started!**\nOn the clock: **${team ? team.region + ' ' + team.name : 'Unknown Team'}** (Round ${firstPick.round}, Pick ${firstPick.pick})` 
 			});
@@ -85,6 +164,12 @@ module.exports = {
 		}
 
 		if (subcommand === 'pick') {
+			// Cancel the timer immediately on manual pick
+			if (activeTimer) {
+				clearTimeout(activeTimer);
+				activeTimer = null;
+			}
+
 			if (draftState.current_pick_index >= picks.length) {
 				return interaction.reply({ content: "The draft is already complete.", ephemeral: true });
 			}
@@ -111,6 +196,9 @@ module.exports = {
 					const nextPick = picks[nextDraftState.current_pick_index];
 					const nextTeam = getTeam(save, nextPick.tid);
 					followUp = `Next on the clock: **${nextTeam ? nextTeam.region + ' ' + nextTeam.name : 'Unknown Team'}**.`;
+					
+					// Start timer for next pick
+					startPickTimer(interaction.client);
 				}
 
 				return interaction.reply({ 
