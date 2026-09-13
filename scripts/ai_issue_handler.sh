@@ -277,6 +277,181 @@ case "${STAGE}" in
     exit 1
     ;;
 esac
+  IFS=',' read -ra MODEL_LIST <<< "${models_csv}"
+
+  : > "${LOG_FILE}"  # start this run's combined log fresh
+  local attempt_log="/tmp/aider_attempt.log"
+  local model=""
+  local aider_exit=1
+
+  for raw_model in "${MODEL_LIST[@]}"; do
+    # trim whitespace in case the list was written as "a, b, c"
+    model="$(echo "${raw_model}" | xargs)"
+    [[ -z "${model}" ]] && continue
+
+    echo "=== Attempting model: ${model} ===" | tee -a "${LOG_FILE}"
+
+    # --yes-always      : never block on interactive confirmations (e.g.
+    #                      when Aider wants to touch a file it doesn't
+    #                      already have open — expected, since we don't
+    #                      pre-select files).
+    # --message-file     : the brief built in stage_prepare.
+    # --no-check-update  : skip Aider's own "new version available"
+    #                      network check, which just wastes time in CI.
+    # --no-analytics      : don't phone home usage analytics from a
+    #                      CI runner.
+    set +e
+    aider \
+      --model "${model}" \
+      --message-file "${PROMPT_FILE}" \
+      --yes-always \
+      --no-check-update \
+      --no-analytics \
+      > "${attempt_log}" 2>&1
+    aider_exit=$?
+    set -e
+
+    cat "${attempt_log}" | tee -a "${LOG_FILE}"
+
+    if [[ ${aider_exit} -eq 0 ]]; then
+      echo "Model ${model} completed without error." | tee -a "${LOG_FILE}"
+      break
+    fi
+
+    if grep -qiE "RateLimitError|RESOURCE_EXHAUSTED|rate.?limit" "${attempt_log}"; then
+      echo "Model ${model} was rate-limited — trying the next model in the fallback list, if any." | tee -a "${LOG_FILE}"
+      continue
+    else
+      echo "Model ${model} failed for a reason other than rate limiting — not trying further fallback models, since retrying elsewhere wouldn't help." | tee -a "${LOG_FILE}"
+      break
+    fi
+  done
+
+  if [[ ${aider_exit} -ne 0 ]]; then
+    echo "AIDER_FAILED=1" >> "${GITHUB_ENV}"
+    echo "Aider exited with status ${aider_exit} (last model tried: ${model})."
+    # Don't hard-fail the step here — let stage_finish decide what to tell
+    # the user, so the workflow always ends with a clear comment instead of
+    # just a red X with no explanation.
+  fi
+
+  local head_sha
+  head_sha="$(git rev-parse HEAD)"
+  if [[ "${head_sha}" == "${BASE_SHA}" ]]; then
+    echo "HAS_CHANGES=0" >> "${GITHUB_ENV}"
+  else
+    echo "HAS_CHANGES=1" >> "${GITHUB_ENV}"
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# Stage: finish
+# ---------------------------------------------------------------------------
+stage_finish() {
+  : "${ISSUE_NUMBER:?ISSUE_NUMBER not set}"
+  : "${REPO:?REPO not set}"
+
+  local log_tail=""
+  if [[ -f "${LOG_FILE}" ]]; then
+    log_tail="$(tail -n 60 "${LOG_FILE}")"
+  fi
+
+  if [[ "${AIDER_FAILED:-0}" == "1" ]]; then
+    comment_on_issue "$(cat <<EOF
+🤖 I tried to work on this issue automatically but Aider hit an error before finishing. Here's the tail of the log:
+
+\`\`\`
+${log_tail}
+\`\`\`
+
+You may need to refine the issue description or check the Gemini API key/quota, then re-add the \`ai-task\` label to retry.
+EOF
+)"
+    echo "Aider failed; posted a comment on issue #${ISSUE_NUMBER}. Not opening a PR."
+    exit 0
+  fi
+
+  if [[ "${HAS_CHANGES:-0}" == "0" ]]; then
+    comment_on_issue "🤖 I looked at this issue but didn't make any code changes — either I couldn't find a safe, concrete change to make, or the request needs more detail. Feel free to add more context and re-apply the \`ai-task\` label to try again."
+    echo "No changes produced by Aider. Not opening a PR."
+    exit 0
+  fi
+
+  echo "Pushing branch ${BRANCH_NAME}..."
+  git push --force-with-lease origin "${BRANCH_NAME}"
+
+  local issue_title
+  issue_title="$(gh issue view "${ISSUE_NUMBER}" --repo "${REPO}" --json title --jq .title)"
+
+  local pr_body
+  pr_body="$(cat <<EOF
+This pull request was generated automatically by Aider (using Gemini) in response to issue #${ISSUE_NUMBER}.
+
+Closes #${ISSUE_NUMBER}
+
+---
+
+### Summary of what the AI did
+\`\`\`
+$(tail -n 80 "${LOG_FILE}" 2>/dev/null || echo "(no log captured)")
+\`\`\`
+
+**Please review this diff carefully before merging** — it was written without a human in the loop.
+EOF
+)"
+
+  # Reuse an existing open PR for this branch if one is already there
+  # (relevant when the label gets toggled off/on more than once).
+  local existing_pr
+  existing_pr="$(gh pr list --repo "${REPO}" --head "${BRANCH_NAME}" --state open --json number --jq '.[0].number // empty')"
+
+  if [[ -n "${existing_pr}" ]]; then
+    gh pr edit "${existing_pr}" --repo "${REPO}" --body "${pr_body}"
+    comment_on_issue "🤖 Updated the existing pull request: #${existing_pr}"
+    echo "Updated existing PR #${existing_pr}."
+  else
+    local default_branch
+    default_branch="$(gh repo view "${REPO}" --json defaultBranchRef --jq .defaultBranchRef.name)"
+
+    local pr_url=""
+    set +e
+    pr_url="$(gh pr create \
+      --repo "${REPO}" \
+      --base "${default_branch}" \
+      --head "${BRANCH_NAME}" \
+      --title "Fix #${ISSUE_NUMBER}: ${issue_title}" \
+      --body "${pr_body}" \
+      --label "ai-generated" 2>/tmp/pr_create_err.log)"
+    local create_status=$?
+    set -e
+
+    if [[ ${create_status} -ne 0 ]]; then
+      # Most common cause: the "ai-generated" label doesn't exist in this
+      # repo yet. Retry once without it rather than losing the whole PR.
+      echo "First PR creation attempt failed (label missing?), retrying without --label:"
+      cat /tmp/pr_create_err.log || true
+      pr_url="$(gh pr create \
+        --repo "${REPO}" \
+        --base "${default_branch}" \
+        --head "${BRANCH_NAME}" \
+        --title "Fix #${ISSUE_NUMBER}: ${issue_title}" \
+        --body "${pr_body}")"
+    fi
+
+    comment_on_issue "🤖 Opened a pull request with a proposed fix: ${pr_url}"
+    echo "Opened PR: ${pr_url}"
+  fi
+}
+
+case "${STAGE}" in
+  prepare) stage_prepare ;;
+  run)     stage_run ;;
+  finish)  stage_finish ;;
+  *)
+    echo "Usage: $0 {prepare|run|finish}" >&2
+    exit 1
+    ;;
+esac
   # --no-analytics      : don't phone home usage analytics from a CI runner.
   set +e
   aider \
