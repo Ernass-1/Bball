@@ -1,10 +1,27 @@
 require('dotenv').config();
 const fs = require('node:fs');
 const path = require('node:path');
+const http = require('node:http');
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
 const { restoreFromGitHub, backupToGitHub } = require('./services/dataBackup');
 const { registerCommands } = require('./deploy-commands');
 const { ensureDirectoryExists, getActiveSavePath } = require('./services/saveEditor');
+
+// Start a minimal HTTP server for Render health checks
+const port = process.env.PORT || 3000;
+const server = http.createServer((req, res) => {
+	if (req.url === '/health') {
+		res.writeHead(200, { 'Content-Type': 'text/plain' });
+		res.end('OK');
+	} else {
+		res.writeHead(404);
+		res.end();
+	}
+});
+
+server.listen(port, () => {
+	console.log(`Health check server listening on port ${port}`);
+});
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 

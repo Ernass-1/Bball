@@ -21,7 +21,10 @@ A Discord bot base for managing Basketball GM leagues.
     *   `DATA_BACKUP_BRANCH`: The branch name to store data (default "bot-data").
     *   `BACKUP_INTERVAL_MINUTES`: How often to auto-backup (default 5).
 
-3.  **Data Storage & Persistence:**
+3.  **Hosting Note (Render/Free Tiers):**
+    *   The bot includes a minimal HTTP server that listens on `process.env.PORT` (or 3000 by default) with a `/health` endpoint. This is included solely to satisfy health check requirements for platforms like Render's free Web Service tier, which require the process to bind to a port. It does not serve any bot functionality or data.
+
+4.  **Data Storage & Persistence:**
     *   The bot stores the current league state in `data/active_save.json`. This directory and file are managed automatically by the bot at runtime.
     *   **GitHub Backup Mechanism**: To protect against filesystem wipes (common on platforms like Render), the bot automatically backs up its database and save file to a dedicated GitHub branch.
         *   **Restore**: On startup, the bot clones the configured branch and restores the database and save file.
