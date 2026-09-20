@@ -70,6 +70,11 @@ db.exec(`
   );
 `);
 
+const TABLES = [
+    'team_links', 'trades', 'trade_assets', 'fa_offers', 'draft_state',
+    'team_roles', 'team_channels', 'bot_config', 'rfa_status'
+];
+
 function linkTeam(discordId, teamId) {
     const stmt = db.prepare('INSERT OR REPLACE INTO team_links (discord_id, team_id) VALUES (?, ?)');
     return stmt.run(discordId, teamId);
@@ -233,29 +238,17 @@ function setRfaStatus(playerId, status) {
 
 // Backup/Restore helpers
 function getAllData() {
-    return {
-        team_links: db.prepare('SELECT * FROM team_links').all(),
-        trades: db.prepare('SELECT * FROM trades').all(),
-        trade_assets: db.prepare('SELECT * FROM trade_assets').all(),
-        fa_offers: db.prepare('SELECT * FROM fa_offers').all(),
-        draft_state: db.prepare('SELECT * FROM draft_state').all(),
-        team_roles: db.prepare('SELECT * FROM team_roles').all(),
-        team_channels: db.prepare('SELECT * FROM team_channels').all(),
-        bot_config: db.prepare('SELECT * FROM bot_config').all(),
-        rfa_status: db.prepare('SELECT * FROM rfa_status').all()
-    };
+    const data = {};
+    for (const table of TABLES) {
+        data[table] = db.prepare(`SELECT * FROM ${table}`).all();
+    }
+    return data;
 }
 
 function clearAllTables() {
-    db.prepare('DELETE FROM team_links').run();
-    db.prepare('DELETE FROM trades').run();
-    db.prepare('DELETE FROM trade_assets').run();
-    db.prepare('DELETE FROM fa_offers').run();
-    db.prepare('DELETE FROM draft_state').run();
-    db.prepare('DELETE FROM team_roles').run();
-    db.prepare('DELETE FROM team_channels').run();
-    db.prepare('DELETE FROM bot_config').run();
-    db.prepare('DELETE FROM rfa_status').run();
+    for (const table of TABLES) {
+        db.prepare(`DELETE FROM ${table}`).run();
+    }
 }
 
 function importData(data) {
