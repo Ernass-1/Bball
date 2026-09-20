@@ -180,6 +180,11 @@ function advancePick() {
     return stmt.run();
 }
 
+function setPickStartedAt(timestamp) {
+    const stmt = db.prepare("INSERT OR REPLACE INTO bot_config (config_key, config_value, updated_at) VALUES ('draft_pick_started_at', ?, CURRENT_TIMESTAMP)");
+    return stmt.run(timestamp);
+}
+
 // Team Roles
 function upsertTeamRole(teamId, roleId) {
     const stmt = db.prepare('INSERT OR REPLACE INTO team_roles (team_id, role_id) VALUES (?, ?)');
@@ -307,6 +312,7 @@ module.exports = {
     getDraftState,
     setDraftState,
     advancePick,
+    setPickStartedAt,
     upsertTeamRole,
     getRoleForTeam,
     getAllTeamRoles,

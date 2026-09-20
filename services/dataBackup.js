@@ -4,10 +4,13 @@ const { execSync } = require('node:child_process');
 const crypto = require('node:crypto');
 const db = require('../database');
 const { getActiveSavePath } = require('./saveEditor');
+const { HISTORY_FILE } = require('./leagueHistory');
 
 const BACKUP_DIR = path.join('/tmp', 'data-backup-clone');
 const REPO_URL = `https://${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPO}.git`;
 const BRANCH = process.env.DATA_BACKUP_BRANCH || 'bot-data';
+const HISTORY_BRANCH = process.env.HISTORY_BRANCH || 'bot-history';
+const PUSHED_OFFSET_FILE = path.join(process.cwd(), 'data', '.history_pushed_offset');
 
 function runGit(args, cwd = BACKUP_DIR) {
     return execSync(`git ${args}`, { cwd, stdio: 'pipe' });
@@ -58,6 +61,7 @@ function restoreFromGitHub() {
 
 function backupToGitHub() {
     console.log('Starting automated backup to GitHub...');
+    backupHistoryToGitHub();
     
     try {
         // 1. Export DB
@@ -96,6 +100,59 @@ function backupToGitHub() {
         }
     } catch (error) {
         console.error('Backup failed:', error);
+    }
+}
+
+function backupHistoryToGitHub() {
+    if (!fs.existsSync(HISTORY_FILE)) return;
+
+    console.log('Checking for league history updates...');
+    const currentSize = fs.statSync(HISTORY_FILE).size;
+    let lastPushedOffset = 0;
+    if (fs.existsSync(PUSHED_OFFSET_FILE)) {
+        lastPushedOffset = parseInt(fs.readFileSync(PUSHED_OFFSET_FILE, 'utf8'), 10) || 0;
+    }
+
+    if (currentSize <= lastPushedOffset) return;
+
+    try {
+        const HISTORY_BACKUP_DIR = path.join('/tmp', 'history-backup-clone');
+        if (!fs.existsSync(HISTORY_BACKUP_DIR)) {
+            fs.mkdirSync(HISTORY_BACKUP_DIR, { recursive: true });
+        }
+
+        if (!fs.existsSync(path.join(HISTORY_BACKUP_DIR, '.git'))) {
+            try {
+                runGit('init', HISTORY_BACKUP_DIR);
+                runGit(`remote add origin ${REPO_URL}`, HISTORY_BACKUP_DIR);
+            } catch (e) {}
+        }
+        
+        try {
+            runGit(`fetch origin ${HISTORY_BRANCH}`, HISTORY_BACKUP_DIR);
+            runGit(`checkout ${HISTORY_BRANCH}`, HISTORY_BACKUP_DIR);
+        } catch (e) {
+            try {
+                runGit(`checkout -b ${HISTORY_BRANCH}`, HISTORY_BACKUP_DIR);
+            } catch (e2) {}
+        }
+
+        fs.copyFileSync(HISTORY_FILE, path.join(HISTORY_BACKUP_DIR, 'league_history.log'));
+
+        runGit('config user.name "Bot Backup"', HISTORY_BACKUP_DIR);
+        runGit('config user.email "bot@example.com"', HISTORY_BACKUP_DIR);
+        runGit('add league_history.log', HISTORY_BACKUP_DIR);
+        
+        try {
+            runGit('diff-index --quiet HEAD', HISTORY_BACKUP_DIR);
+        } catch (e) {
+            runGit(`commit -m "Update league history ${new Date().toISOString()}"`, HISTORY_BACKUP_DIR);
+            runGit(`push origin ${HISTORY_BRANCH}`, HISTORY_BACKUP_DIR);
+            fs.writeFileSync(PUSHED_OFFSET_FILE, currentSize.toString(), 'utf8');
+            console.log('League history pushed to GitHub.');
+        }
+    } catch (error) {
+        console.error('History backup failed:', error);
     }
 }
 

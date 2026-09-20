@@ -4,6 +4,7 @@ const { setDraftState, getDraftState, advancePick, getTeamLink, setPickStartedAt
 const { isCommissioner, isBotOwner } = require('../utils/permissions');
 const { getTeamChannel } = require('../services/channelHelper');
 const { getConfiguredChannelId } = require('../utils/config');
+const { logEvent } = require('../services/leagueHistory');
 
 // In-memory timer tracker.
 let activeTimer = null;
@@ -48,6 +49,13 @@ async function resolvePick(client, isRecovery = false) {
 	try {
 		const updatedSave = draftPlayer(save, playerName, currentPick.tid, draftState.current_pick_index, draftState.season);
 		saveSaveFile(updatedSave, activeSavePath);
+		
+		logEvent(client, 'draft_pick', {
+			pickNum: draftState.current_pick_index + 1,
+			teamName: teamName,
+			playerName: playerName
+		});
+
 		advancePick();
 
 		const prefix = isRecovery ? "⌛ Bot was offline — " : "⌛ Time expired — ";
@@ -296,6 +304,13 @@ module.exports = {
 			try {
 				const updatedSave = draftPlayer(save, playerName, currentPick.tid, draftState.current_pick_index, draftState.season);
 				saveSaveFile(updatedSave, activeSavePath);
+
+				logEvent(interaction.client, 'draft_pick', {
+					pickNum: draftState.current_pick_index + 1,
+					teamName: getTeam(save, currentPick.tid).name,
+					playerName: playerName
+				});
+
 				advancePick();
 
 				const nextDraftState = getDraftState();

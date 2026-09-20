@@ -4,6 +4,7 @@ const { hasActiveSave, loadSaveFile, getTeam, saveSaveFile, canSignWithinCapRule
 const { evaluateOffers } = require('../services/faEngine');
 const { isCommissioner, isBotOwner } = require('../utils/permissions');
 const { getTeamChannel } = require('../services/channelHelper');
+const { logEvent } = require('../services/leagueHistory');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -221,6 +222,13 @@ module.exports = {
 
 			const team = getTeam(save, winningOffer.team_id);
 			const teamName = team ? `${team.region} ${team.name}` : `Team ID ${winningOffer.team_id}`;
+
+			logEvent(interaction.client, 'fa_signed', {
+				playerName,
+				teamName,
+				amount: winningOffer.amount_per_year,
+				years: winningOffer.years
+			});
 
 			const embed = new EmbedBuilder()
 				.setTitle(`Free Agent Signed: ${playerName}`)

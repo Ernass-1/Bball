@@ -1,6 +1,7 @@
 const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { getTrade, updateTradeStatus } = require('../database/index.js');
 const { isCommissioner, isBotOwner } = require('../utils/permissions.js');
+const { logEvent } = require('../services/leagueHistory');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -71,6 +72,18 @@ module.exports = {
 
 			if (isApprove) {
 				updateTradeStatus(tradeId, 'approved');
+				
+				const originalEmbed = interaction.message.embeds[0];
+				const proposerTeam = originalEmbed.fields.find(f => f.name === 'From') || { value: 'Unknown' };
+				const recipientTeam = originalEmbed.fields.find(f => f.name === 'To') || { value: 'Unknown' };
+				const assets = originalEmbed.description;
+
+				logEvent(interaction.client, 'trade_approved', {
+					proposerTeam: proposerTeam.value,
+					recipientTeam: recipientTeam.value,
+					assets: assets
+				});
+
 				const approvedEmbed = EmbedBuilder.from(interaction.message.embeds[0])
 					.setDescription(`✅ Approved by ${interaction.user.tag}`);
 				await interaction.update({ embeds: [approvedEmbed], components: [] });
