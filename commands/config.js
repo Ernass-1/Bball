@@ -17,7 +17,8 @@ module.exports = {
                         .setRequired(true)
                         .addChoices(
                             { name: 'Commissioner channel', value: 'commish' },
-                            { name: 'Draft channel', value: 'draft' }
+                            { name: 'Draft channel', value: 'draft' },
+                            { name: 'Trade Review channel', value: 'trade_review' }
                         ))
                 .addChannelOption(option =>
                     option.setName('channel')
@@ -68,6 +69,7 @@ module.exports = {
 
             const commishChannel = getConfig('channel:commish');
             const draftChannel = getConfig('channel:draft');
+            const tradeReviewChannel = getConfig('channel:trade_review');
             const commishRole = getConfig('role:commissioner');
 
             const embed = new EmbedBuilder()
@@ -75,6 +77,7 @@ module.exports = {
                 .addFields(
                     { name: 'Commissioner Channel', value: getSource(commishChannel ? `<#${commishChannel}>` : null, process.env.COMMISH_CHANNEL_ID ? `<#${process.env.COMMISH_CHANNEL_ID}>` : null) },
                     { name: 'Draft Channel', value: getSource(draftChannel ? `<#${draftChannel}>` : null, process.env.DRAFT_CHANNEL_ID ? `<#${process.env.DRAFT_CHANNEL_ID}>` : null) },
+                    { name: 'Trade Review Channel', value: getSource(tradeReviewChannel ? `<#${tradeReviewChannel}>` : null, process.env.TRADE_REVIEW_CHANNEL_ID ? `<#${process.env.TRADE_REVIEW_CHANNEL_ID}>` : null) },
                     { name: 'Commissioner Role', value: getSource(commishRole ? `<@&${commishRole}>` : null, process.env.COMMISSIONER_ROLE_ID ? `<@&${process.env.COMMISSIONER_ROLE_ID}>` : null) }
                 );
 

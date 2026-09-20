@@ -1,7 +1,9 @@
 const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { getTrade, updateTradeStatus } = require('../database/index.js');
+const { getTrade, updateTradeStatus, setTradeReviewStarted, addTradeVote, getTradeVoteCount, getTeamLink } = require('../database/index.js');
 const { isCommissioner, isBotOwner } = require('../utils/permissions.js');
 const { logEvent } = require('../services/leagueHistory');
+const { getConfiguredChannelId } = require('../utils/config.js');
+const { resolveTradeReview } = require('../services/tradeReview.js');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -12,8 +14,9 @@ module.exports = {
 		const isReject = interaction.customId.startsWith('reject_trade_');
 		const isApprove = interaction.customId.startsWith('approve_trade_');
 		const isDeny = interaction.customId.startsWith('deny_trade_');
+		const isVeto = interaction.customId.startsWith('veto_trade_');
 
-		if (!isAccept && !isReject && !isApprove && !isDeny) return;
+		if (!isAccept && !isReject && !isApprove && !isDeny && !isVeto) return;
 
 		const tradeId = interaction.customId.split('_').pop();
 		const trade = getTrade(tradeId);
@@ -29,38 +32,68 @@ module.exports = {
 			}
 
 			if (isAccept) {
-				updateTradeStatus(tradeId, 'accepted');
+				setTradeReviewStarted(tradeId);
 				const acceptedEmbed = EmbedBuilder.from(interaction.message.embeds[0])
-					.setDescription('✅ Accepted — awaiting commissioner approval');
+					.setDescription('✅ Accepted — entering trade review window');
 				
 				await interaction.update({ embeds: [acceptedEmbed], components: [] });
 
-				const commishChannelId = process.env.COMMISH_CHANNEL_ID;
-				const commishChannel = interaction.client.channels.cache.get(commishChannelId);
-				if (commishChannel) {
-					const commishEmbed = EmbedBuilder.from(interaction.message.embeds[0])
-						.setTitle('Trade Approval Required')
-						.setDescription(`Trade accepted by <@${trade.recipient_discord_id}>`);
+				const reviewChannelId = getConfiguredChannelId('trade_review');
+				const reviewChannel = await interaction.client.channels.fetch(reviewChannelId).catch(() => null);
+				
+				if (reviewChannel) {
+					const threshold = parseInt(process.env.TRADE_VETO_THRESHOLD) || 3;
+					const reviewEmbed = EmbedBuilder.from(interaction.message.embeds[0])
+						.setTitle('Trade Under Review')
+						.setFooter({ text: `Trade ID: ${tradeId}` });
 					
-					const commishRow = new ActionRowBuilder()
+					const reviewRow = new ActionRowBuilder()
 						.addComponents(
 							new ButtonBuilder()
-								.setCustomId(`approve_trade_${tradeId}`)
-								.setLabel('Approve Trade')
-								.setStyle(ButtonStyle.Success),
-							new ButtonBuilder()
-								.setCustomId(`deny_trade_${tradeId}`)
-								.setLabel('Deny Trade')
-								.setStyle(ButtonStyle.Danger),
+								.setCustomId(`veto_trade_${tradeId}`)
+								.setLabel(`🚫 Vote to Veto (0/${threshold})`)
+								.setStyle(ButtonStyle.Secondary),
 						);
 
-					await commishChannel.send({ embeds: [commishEmbed], components: [commishRow] });
+					const reviewMsg = await reviewChannel.send({ embeds: [reviewEmbed], components: [reviewRow] });
+					
+					const reviewHours = parseInt(process.env.TRADE_REVIEW_HOURS) || 24;
+					setTimeout(() => resolveTradeReview(tradeId, interaction.client, reviewMsg), reviewHours * 60 * 60 * 1000);
 				}
 			} else {
 				updateTradeStatus(tradeId, 'rejected');
 				const rejectedEmbed = EmbedBuilder.from(interaction.message.embeds[0])
 					.setDescription('❌ Rejected by the other team');
 				await interaction.update({ embeds: [rejectedEmbed], components: [] });
+			}
+		}
+
+		// Handle Veto Button
+		if (isVeto) {
+			const teamLink = getTeamLink(interaction.user.id);
+			if (!teamLink && !isBotOwner(interaction.user.id)) {
+				return interaction.reply({ content: "Only claimed team owners can vote to veto trades.", ephemeral: true });
+			}
+
+			if (interaction.user.id === trade.proposer_discord_id || interaction.user.id === trade.recipient_discord_id) {
+				return interaction.reply({ content: "You cannot vote to veto your own trade.", ephemeral: true });
+			}
+
+			const added = addTradeVote(tradeId, interaction.user.id);
+			if (!added) {
+				return interaction.reply({ content: "You've already voted on this trade.", ephemeral: true });
+			}
+
+			const count = getTradeVoteCount(tradeId);
+			const threshold = parseInt(process.env.TRADE_VETO_THRESHOLD) || 3;
+
+			if (count >= threshold) {
+				await interaction.deferUpdate();
+				await resolveTradeReview(tradeId, interaction.client, interaction.message);
+			} else {
+				const row = ActionRowBuilder.from(interaction.message.components[0]);
+				row.components[0].setLabel(`🚫 Vote to Veto (${count}/${threshold})`);
+				await interaction.update({ components: [row] });
 			}
 		}
 
