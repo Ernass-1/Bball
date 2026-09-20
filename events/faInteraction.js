@@ -1,7 +1,8 @@
 const { Events, EmbedBuilder } = require('discord.js');
 const { getFaOffer, updateFaOfferStatus, closeOtherOffersForPlayer } = require('../database');
-const { hasActiveSave, loadSaveFile, saveSaveFile, canSignWithinCapRules, getActiveSavePath } = require('../services/saveEditor');
+const { hasActiveSave, loadSaveFile, saveSaveFile, canSignWithinCapRules, getActiveSavePath, getTeam } = require('../services/saveEditor');
 const { isCommissioner } = require('../utils/permissions.js');
+const { logEvent } = require('../services/leagueHistory');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -59,6 +60,13 @@ module.exports = {
 
 		try {
 			saveSaveFile(save, activeSavePath);
+			const team = getTeam(save, offer.team_id);
+			logEvent(interaction.client, 'fa_signed', {
+				playerName: offer.player_name,
+				teamName: team ? `${team.region} ${team.name}` : `Team ${offer.team_id}`,
+				amount: offer.amount_per_year,
+				years: offer.years
+			});
 		} catch (error) {
 			return interaction.reply({ content: `Failed to save save file: ${error.message}`, ephemeral: true });
 		}

@@ -1,6 +1,7 @@
 const { Events, EmbedBuilder } = require('discord.js');
 const { linkTeamToUser, getRoleForTeam, getAllTeamRoles } = require('../database/index.js');
 const { isCommissioner } = require('../utils/permissions.js');
+const { logEvent } = require('../services/leagueHistory');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -25,6 +26,15 @@ module.exports = {
 
 		if (isApprove) {
 			linkTeamToUser(requesterId, teamId);
+			
+			const teamName = originalEmbed.fields.find(f => f.name === 'Team')?.value || `Team ${teamId}`;
+			const userName = originalEmbed.fields.find(f => f.name === 'User')?.value || requesterId;
+
+			logEvent(interaction.client, 'team_claimed', {
+				teamName: teamName,
+				userName: userName
+			});
+
 			updatedEmbed.setDescription(`✅ Approved by ${interaction.user.tag}`);
 			
 			// Handle Roles
