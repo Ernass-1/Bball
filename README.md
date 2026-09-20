@@ -42,7 +42,7 @@ A Discord bot base for managing Basketball GM leagues.
 
 *   **Command Registration**: The bot automatically registers all slash commands on startup. You do not need to run a separate script. If you are developing, setting `GUILD_ID` in your `.env` file is recommended so that changes appear instantly on your test server. You can still run `node deploy-commands.js` manually if you need to force a refresh without restarting the bot.
 
-*   **/config set-channel [purpose] [channel]**: (Administrator/Bot Owner only) Sets the channel for a specific purpose (Commissioner or Draft).
+*   **/config set-channel [purpose] [channel]**: (Administrator/Bot Owner only) Sets the channel for a specific purpose (Commissioner, Draft, or Trade Review).
 *   **/config set-role [purpose] [role]**: (Administrator/Bot Owner only) Sets the role for a specific purpose (Commissioner).
 *   **/config show**: (Administrator/Bot Owner only) Displays the current configuration, showing whether values are set via Discord or falling back to environment variables.
 *   **Note**: New commands requiring the commissioner channel, draft channel, or commissioner role must use `getConfiguredChannelId` or `getConfiguredRoleId` helpers instead of reading environment variables directly.
@@ -58,7 +58,8 @@ A Discord bot base for managing Basketball GM leagues.
     *   **Access Control**: Channels are created with permission overwrites so that only the team's role and the commissioner role can view them. Access is automatically managed via Discord's role system.
     *   **Note**: Future features will post automated updates (e.g., contract expirations, RFA status, draft picks) into these channels.
 
-*   **/trade propose [recipient] [your_player] [their_player]**: Propose a trade. The bot enforces a salary matching rule: a team can only take on incoming salary if it is less than or equal to 125% of the outgoing salary plus $100,000.
+*   **/trade propose [recipient] [your_player] [their_player]**: Propose a trade. The bot enforces a salary matching rule: a team can only take on incoming salary if it is less than or equal to 125% of the outgoing salary plus $100,000. 
+    *   **Trade Review Window**: Accepted trades enter a review window (`TRADE_REVIEW_HOURS`). Other team owners can vote to veto. Meeting the `TRADE_VETO_THRESHOLD` automatically denies the trade. Otherwise, it proceeds to the commissioner for final approval after the window expires.
 
 *   **/fa offer [player_name] [amount_per_year] [years]**: Submit a contract offer to a free agent. Commissioners will receive the offer in the commissioner channel with a button to sign the player to that offer.
 

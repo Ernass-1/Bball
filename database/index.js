@@ -15,7 +15,16 @@ db.exec(`
     proposer_discord_id TEXT NOT NULL,
     recipient_discord_id TEXT NOT NULL,
     status TEXT DEFAULT 'pending',
+    review_started_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS trade_votes (
+    trade_id INTEGER NOT NULL,
+    discord_id TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (trade_id, discord_id),
+    FOREIGN KEY (trade_id) REFERENCES trades(id) ON DELETE CASCADE
   );
 
   CREATE TABLE IF NOT EXISTS trade_assets (
@@ -71,7 +80,7 @@ db.exec(`
 `);
 
 const TABLES = [
-    'team_links', 'trades', 'trade_assets', 'fa_offers', 'draft_state',
+    'team_links', 'trades', 'trade_votes', 'trade_assets', 'fa_offers', 'draft_state',
     'team_roles', 'team_channels', 'bot_config', 'rfa_status'
 ];
 
@@ -137,6 +146,31 @@ function getTrade(tradeId) {
 function updateTradeStatus(tradeId, status) {
     const stmt = db.prepare('UPDATE trades SET status = ? WHERE id = ?');
     return stmt.run(status, tradeId);
+}
+
+function addTradeVote(tradeId, discordId) {
+    try {
+        const stmt = db.prepare('INSERT INTO trade_votes (trade_id, discord_id) VALUES (?, ?)');
+        stmt.run(tradeId, discordId);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+function getTradeVoteCount(tradeId) {
+    const stmt = db.prepare('SELECT COUNT(*) as count FROM trade_votes WHERE trade_id = ?');
+    return stmt.get(tradeId).count;
+}
+
+function getTradesInReview() {
+    const stmt = db.prepare("SELECT * FROM trades WHERE status = 'in_review'");
+    return stmt.all();
+}
+
+function setTradeReviewStarted(tradeId) {
+    const stmt = db.prepare("UPDATE trades SET status = 'in_review', review_started_at = CURRENT_TIMESTAMP WHERE id = ?");
+    return stmt.run(tradeId);
 }
 
 function createFaOffer(discordId, teamId, playerName, amountPerYear, years) {
@@ -263,8 +297,13 @@ function importData(data) {
         const insertTeam = db.prepare('INSERT INTO team_links (discord_id, team_id) VALUES (?, ?)');
         for (const row of data.team_links) insertTeam.run(row.discord_id, row.team_id);
 
-        const insertTrade = db.prepare('INSERT INTO trades (id, proposer_discord_id, recipient_discord_id, status, created_at) VALUES (?, ?, ?, ?, ?)');
-        for (const row of data.trades) insertTrade.run(row.id, row.proposer_discord_id, row.recipient_discord_id, row.status, row.created_at);
+        const insertTrade = db.prepare('INSERT INTO trades (id, proposer_discord_id, recipient_discord_id, status, review_started_at, created_at) VALUES (?, ?, ?, ?, ?, ?)');
+        for (const row of data.trades) insertTrade.run(row.id, row.proposer_discord_id, row.recipient_discord_id, row.status, row.review_started_at, row.created_at);
+
+        if (data.trade_votes) {
+            const insertVote = db.prepare('INSERT INTO trade_votes (trade_id, discord_id, created_at) VALUES (?, ?, ?)');
+            for (const row of data.trade_votes) insertVote.run(row.trade_id, row.discord_id, row.created_at);
+        }
 
         if (data.trade_assets) {
             const insertAsset = db.prepare('INSERT INTO trade_assets (id, trade_id, side, asset_type, player_name, pick_season, pick_round) VALUES (?, ?, ?, ?, ?, ?, ?)');
@@ -304,6 +343,10 @@ module.exports = {
     getTradeAssets,
     getTrade,
     updateTradeStatus,
+    addTradeVote,
+    getTradeVoteCount,
+    getTradesInReview,
+    setTradeReviewStarted,
     createFaOffer,
     getOpenOffersForPlayer,
     getFaOffer,
