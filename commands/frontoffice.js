@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { hasActiveSave, getActiveSavePath, loadSaveFile, resolveTeamId } = require('../services/saveEditor');
+const { hasActiveSave, getActiveSavePath, loadSaveFile, resolveTeamId, getPlayerContract, getSeasonAttr, getCurrentSeason } = require('../services/saveEditor');
 const { getTeamLink } = require('../database/index');
 
 module.exports = {
@@ -29,29 +29,45 @@ module.exports = {
 		try {
 			const tid = resolveTeamId(save, teamInput);
 			team = save.teams.find(t => t.tid === tid);
-		} catch (e) {
-			return interaction.reply({ content: "Team not found.", ephemeral: true });
+		} catch (error) {
+			// Surface the real reason (not found vs. ambiguous) instead of a generic message.
+			return interaction.reply({ content: error.message, ephemeral: true });
 		}
 
 		const players = save.players.filter(p => p.tid === team.tid);
-		const currentSeason = save.gameAttributes.find(a => a.key === 'season').value;
-		const salaryCap = save.gameAttributes.find(a => a.key === 'salaryCap').value / 1000; // BBGM uses thousands
+		const currentSeason = getCurrentSeason(save);
+		// gameAttributes can be a plain object or an array of {key,value} depending on
+		// BBGM version — getSeasonAttr handles both instead of assuming one shape.
+		const salaryCapRaw = getSeasonAttr(save, 'salaryCap');
+		const salaryCap = salaryCapRaw ? salaryCapRaw / 1000 : null; // BBGM stores this in thousands
 
 		let totalPayroll = 0;
 		let minContractCount = 0;
-		const minSalary = 1000; // Standard BBGM min is 1000 ($1M)
+		const minSalary = getSeasonAttr(save, 'minContract') || 1000; // Standard BBGM min is 1000 ($1M)
 
 		players.forEach(p => {
-			if (p.contract && p.contract.amount) {
-				totalPayroll += p.contract.amount;
-				if (p.contract.amount <= minSalary) {
+			// Contracts can live under either `contract` or `salaries[0]` in this
+			// codebase's save files — getPlayerContract checks both.
+			const contract = getPlayerContract(p);
+			if (contract && contract.amount) {
+				totalPayroll += contract.amount;
+				if (contract.amount <= minSalary) {
 					minContractCount++;
 				}
 			}
 		});
 
-		const diff = salaryCap - totalPayroll;
-		const diffText = diff >= 0 ? `Under cap by $${(diff/1000).toFixed(2)}M` : `Over cap by $${(Math.abs(diff)/1000).toFixed(2)}M`;
+		let payrollFieldValue;
+		let capFieldValue;
+		if (salaryCap !== null) {
+			const diff = salaryCap - (totalPayroll / 1000);
+			capFieldValue = diff >= 0 ? `Under cap by $${diff.toFixed(2)}M` : `Over cap by $${Math.abs(diff).toFixed(2)}M`;
+			payrollFieldValue = `$${(totalPayroll / 1000).toFixed(2)}M / $${salaryCap.toFixed(2)}M`;
+		} else {
+			// This save doesn't expose a salary cap figure — show payroll without a cap comparison.
+			capFieldValue = 'Unknown (save has no salaryCap figure)';
+			payrollFieldValue = `$${(totalPayroll / 1000).toFixed(2)}M`;
+		}
 
 		const picks = (save.draftPicks || [])
 			.filter(p => p.tid === team.tid)
@@ -60,10 +76,10 @@ module.exports = {
 		const pickLines = picks.map(p => `S${p.season} R${p.round} (${p.originalTid === p.tid ? 'Own' : 'from ' + (save.teams.find(t => t.tid === p.originalTid)?.abbrev || 'UNK')})`);
 
 		const embed = new EmbedBuilder()
-			.setTitle(`${team.city} ${team.name} Front Office`)
+			.setTitle(`${team.region} ${team.name} Front Office${currentSeason ? ` — ${currentSeason}` : ''}`)
 			.addFields(
-				{ name: 'Payroll', value: `$${(totalPayroll/1000).toFixed(2)}M / $${(salaryCap/1000).toFixed(2)}M`, inline: true },
-				{ name: 'Cap Space', value: diffText, inline: true },
+				{ name: 'Payroll', value: payrollFieldValue, inline: true },
+				{ name: 'Cap Space', value: capFieldValue, inline: true },
 				{ name: 'Min Contracts', value: minContractCount.toString(), inline: true },
 				{ name: 'Draft Picks', value: pickLines.length > 0 ? pickLines.join('\n') : 'No picks owned' }
 			)
