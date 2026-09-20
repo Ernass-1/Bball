@@ -27,9 +27,15 @@ A Discord bot base for managing Basketball GM leagues.
         *   **Restore**: On startup, the bot clones the configured branch and restores the database and save file.
         *   **Backup**: The bot periodically pushes changes to GitHub.
         *   **Note**: This does not protect against data changes made between the last backup and a crash.
+        *   **Snapshot History**: The bot maintains a rolling history of the `active_save.json` file in the `saves/` directory of the backup branch.
+            *   A new snapshot is created only when the save file content actually changes.
+            *   `SAVE_SNAPSHOT_RETENTION_COUNT` in `.env` (default 20) controls how many snapshots are kept.
         *   **Implementation**: The bot dynamically discovers all database tables, so future tables are automatically included in backups.
     *   Use `/save upload` (Commissioner only) to set the active save.
     *   Use `/save export` to download the current state.
+    *   Use `/save history` (Commissioner only) to view recent snapshots.
+    *   Use `/save restore [timestamp]` (Commissioner only) to revert the league to a past state.
+        *   **Warning**: Restoring a save is destructive to the current league state. It does NOT roll back bot database tables (like trades or free agent offers), which may result in data inconsistency if those records refer to players or teams that didn't exist in the older save.
     *   Commands like `/team claim` and `/fa offer` require an active save file to be uploaded first.
 
 ## Usage
