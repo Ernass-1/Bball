@@ -1,8 +1,13 @@
 const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionFlagsBits } = require('discord.js');
-const { hasActiveSave, loadSaveFile, getActiveSavePath, resolveTeamId, getTeam } = require('../services/saveEditor.js');
+const { hasActiveSave, loadSaveFile, getActiveSavePath, resolveTeamId } = require('../services/saveEditor.js');
 const { isTeamClaimed, upsertTeamRole, getRoleForTeam, upsertTeamChannel, getChannelForTeam } = require('../database/index.js');
 const { isCommissioner } = require('../utils/permissions.js');
 const { getConfiguredRoleId, getConfiguredChannelId } = require('../utils/config.js');
+
+// Helper to get team from save data
+function getTeam(save, teamId) {
+    return save.teams.find(t => t.tid === teamId);
+}
 
 module.exports = {
 	data: new SlashCommandBuilder()

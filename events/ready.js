@@ -13,8 +13,6 @@ module.exports = {
 		console.log(`Ready! Logged in as ${client.user.tag}`);
 
 		// 1. Startup recovery for trade reviews
-		const { getTradesInReview } = require('../database/index.js');
-		const { resolveTradeReview } = require('../services/tradeReview.js');
 		const tradesInReview = getTradesInReview();
 		const reviewHours = parseInt(process.env.TRADE_REVIEW_HOURS) || 24;
 		const reviewMs = reviewHours * 60 * 60 * 1000;
