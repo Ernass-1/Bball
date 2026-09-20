@@ -158,6 +158,20 @@ function getPlayerSalary(save, playerName, teamId) {
     return player.salaries[0].amount;
 }
 
+function getTotalOutgoingSalary(save, assets, teamId) {
+    let totalSalary = 0;
+    for (const asset of assets) {
+        if (asset.asset_type === 'player') {
+            const salary = getPlayerSalary(save, asset.player_name, teamId);
+            if (salary === null) {
+                throw new Error(`Could not find salary for player ${asset.player_name} on team ${teamId}.`);
+            }
+            totalSalary += salary;
+        }
+    }
+    return totalSalary;
+}
+
 function validateTradeSalaries(save, proposerSalary, recipientSalary) {
     // Standard NBA-style rule: incoming <= outgoing * 1.25 + 100k
     // This check must be run independently for BOTH teams in the trade.
@@ -180,6 +194,58 @@ function validateTradeSalaries(save, proposerSalary, recipientSalary) {
     }
 
     return { legal: true };
+}
+
+function executeTradeAssets(save, proposerAssets, proposerTid, recipientAssets, recipientTid) {
+    // 1. Validate all assets exist before mutating anything
+    
+    // Validate Proposer's assets
+    for (const asset of proposerAssets) {
+        if (asset.asset_type === 'player') {
+            const player = save.players.find(p => p.firstName + " " + p.lastName === asset.player_name && p.tid === proposerTid);
+            if (!player) throw new Error(`Player '${asset.player_name}' not found on proposer's team.`);
+        } else if (asset.asset_type === 'pick') {
+            const pick = save.draftPicks.find(p => p.season === asset.pick_season && p.round === asset.pick_round && p.tid === proposerTid);
+            if (!pick) throw new Error(`Pick (Season ${asset.pick_season}, Round ${asset.pick_round}) not found owned by proposer's team.`);
+        }
+    }
+
+    // Validate Recipient's assets
+    for (const asset of recipientAssets) {
+        if (asset.asset_type === 'player') {
+            const player = save.players.find(p => p.firstName + " " + p.lastName === asset.player_name && p.tid === recipientTid);
+            if (!player) throw new Error(`Player '${asset.player_name}' not found on recipient's team.`);
+        } else if (asset.asset_type === 'pick') {
+            const pick = save.draftPicks.find(p => p.season === asset.pick_season && p.round === asset.pick_round && p.tid === recipientTid);
+            if (!pick) throw new Error(`Pick (Season ${asset.pick_season}, Round ${asset.pick_round}) not found owned by recipient's team.`);
+        }
+    }
+
+    // 2. Apply mutations
+    
+    // Move Proposer's assets to Recipient
+    for (const asset of proposerAssets) {
+        if (asset.asset_type === 'player') {
+            const player = save.players.find(p => p.firstName + " " + p.lastName === asset.player_name && p.tid === proposerTid);
+            player.tid = recipientTid;
+        } else if (asset.asset_type === 'pick') {
+            const pick = save.draftPicks.find(p => p.season === asset.pick_season && p.round === asset.pick_round && p.tid === proposerTid);
+            pick.tid = recipientTid;
+        }
+    }
+
+    // Move Recipient's assets to Proposer
+    for (const asset of recipientAssets) {
+        if (asset.asset_type === 'player') {
+            const player = save.players.find(p => p.firstName + " " + p.lastName === asset.player_name && p.tid === recipientTid);
+            player.tid = proposerTid;
+        } else if (asset.asset_type === 'pick') {
+            const pick = save.draftPicks.find(p => p.season === asset.pick_season && p.round === asset.pick_round && p.tid === recipientTid);
+            pick.tid = proposerTid;
+        }
+    }
+
+    return save;
 }
 
 function swapPlayers(save, playerNameA, teamIdA, playerNameB, teamIdB) {
@@ -295,7 +361,9 @@ module.exports = {
     getActiveSavePath,
     hasActiveSave,
     getPlayerSalary,
+    getTotalOutgoingSalary,
     validateTradeSalaries,
+    executeTradeAssets,
     getDraftProspects,
     getPickOrder,
     draftPlayer,
