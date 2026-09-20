@@ -5,6 +5,7 @@ const { evaluateOffers } = require('../services/faEngine');
 const { isCommissioner, isBotOwner } = require('../utils/permissions');
 const { getTeamChannel } = require('../services/channelHelper');
 const { logEvent } = require('../services/leagueHistory');
+const { getConfiguredChannelId } = require('../utils/config');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -101,7 +102,7 @@ module.exports = {
 			if (isRfa) {
 				upsertRfaStatus(`${player.firstName} ${player.lastName}`, rfaStatus.original_team_id, 'signed_elsewhere_pending_match', amountPerYear);
 
-				const commishChannelId = process.env.COMMISH_CHANNEL_ID;
+				const commishChannelId = getConfiguredChannelId('commish');
 				if (commishChannelId) {
 					const channel = await interaction.client.channels.fetch(commishChannelId).catch(() => null);
 					if (channel) {
@@ -146,7 +147,7 @@ module.exports = {
 				return interaction.reply({ content: `Your offer sheet of $${amountPerYear.toLocaleString()}/yr for ${years} year(s) to RFA ${player.firstName} ${player.lastName} has been submitted and sent to the original team for matching!`, ephemeral: true });
 			}
 
-			const commishChannelId = process.env.COMMISH_CHANNEL_ID;
+			const commishChannelId = getConfiguredChannelId('commish');
 			if (commishChannelId) {
 				const channel = await interaction.client.channels.fetch(commishChannelId).catch(() => null);
 				if (channel) {
