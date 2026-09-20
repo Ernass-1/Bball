@@ -351,6 +351,152 @@ function isRfaEligible(player) {
     return player.yearsWithTeam < 4;
 }
 
+/**
+ * Reads a value out of gameAttributes, which BBGM has stored in two shapes
+ * depending on version: a plain object ({ season: 2024, ... }) or an array
+ * of { key, value } records. Handles both.
+ */
+function getSeasonAttr(save, key) {
+    if (!save.gameAttributes) return null;
+    if (Array.isArray(save.gameAttributes)) {
+        const entry = save.gameAttributes.find(a => a.key === key);
+        return entry ? entry.value : null;
+    }
+    return save.gameAttributes[key] !== undefined ? save.gameAttributes[key] : null;
+}
+
+/**
+ * Finds a player by name, tolerant of partial/case-insensitive input.
+ * Mirrors the matching strategy used by resolveTeamId: exact match first,
+ * then a unique substring match, throwing a helpful error on 0 or 2+ hits.
+ */
+function findPlayer(save, input) {
+    if (!save.players || !Array.isArray(save.players)) {
+        throw new Error("No players found in save file.");
+    }
+
+    const search = input.toString().trim().toLowerCase();
+    const fullName = (p) => `${p.firstName} ${p.lastName}`;
+
+    let matches = save.players.filter(p => fullName(p).toLowerCase() === search);
+    if (matches.length === 1) return matches[0];
+
+    if (matches.length === 0) {
+        matches = save.players.filter(p => fullName(p).toLowerCase().includes(search));
+    }
+
+    if (matches.length === 1) {
+        return matches[0];
+    } else if (matches.length === 0) {
+        throw new Error(`No player found matching '${input}'.`);
+    } else {
+        // Prefer players currently on a roster (tid >= 0) for disambiguation display,
+        // but still list everyone that matched.
+        const list = matches.slice(0, 10).map(p => {
+            const team = getTeam(save, p.tid);
+            const where = team ? `${team.abbrev}` : (p.tid === -1 ? 'FA' : p.tid === -2 ? 'Draft Prospect' : 'Retired');
+            return `${fullName(p)} (${where})`;
+        }).join(', ');
+        throw new Error(`'${input}' matches multiple players: ${list}${matches.length > 10 ? ', ...' : ''} — please be more specific.`);
+    }
+}
+
+/** Returns the most recent ratings entry for a player, or null. */
+function getLatestRatings(player) {
+    if (!player.ratings || player.ratings.length === 0) return null;
+    return player.ratings[player.ratings.length - 1];
+}
+
+/** Returns the ratings entry for a given season, falling back to the latest available. */
+function getRatingsForSeason(player, season) {
+    if (!player.ratings || player.ratings.length === 0) return null;
+    if (season === undefined || season === null) return getLatestRatings(player);
+    return player.ratings.find(r => r.season === season) || getLatestRatings(player);
+}
+
+/**
+ * A player's current salary/contract amount and expiration year, whichever
+ * save format is in use (modern BBGM uses `contract`, this codebase's save
+ * editor writes `salaries`). Returns { amount, exp } in thousands, or null.
+ */
+function getPlayerContract(player) {
+    if (player.contract && typeof player.contract.amount === 'number') {
+        return { amount: player.contract.amount, exp: player.contract.exp };
+    }
+    if (player.salaries && player.salaries.length > 0) {
+        return { amount: player.salaries[0].amount, exp: player.salaries[0].exp };
+    }
+    return null;
+}
+
+/**
+ * Aggregates a player's regular-season stat rows for a single season
+ * (a player can have multiple rows in one season if they were traded).
+ * Returns null if the player has no stats for that season.
+ */
+function getStatsForSeason(player, season, { playoffs = false } = {}) {
+    if (!player.stats || player.stats.length === 0) return null;
+    const rows = player.stats.filter(s => s.season === season && !!s.playoffs === playoffs);
+    if (rows.length === 0) return null;
+    return sumStatRows(rows);
+}
+
+/** Aggregates every regular-season stat row a player has ever recorded. */
+function getCareerStats(player) {
+    if (!player.stats || player.stats.length === 0) return null;
+    const rows = player.stats.filter(s => !s.playoffs);
+    if (rows.length === 0) return null;
+    return sumStatRows(rows);
+}
+
+const COUNTING_STAT_KEYS = [
+    'gp', 'gs', 'min', 'fg', 'fga', 'tp', 'tpa', 'ft', 'fta',
+    'orb', 'drb', 'trb', 'ast', 'tov', 'stl', 'blk', 'pf', 'pts'
+];
+
+function sumStatRows(rows) {
+    const totals = {};
+    for (const key of COUNTING_STAT_KEYS) {
+        totals[key] = rows.reduce((sum, row) => sum + (row[key] || 0), 0);
+    }
+    // Some BBGM versions store orb/drb but not trb directly.
+    if (!totals.trb) {
+        totals.trb = (totals.orb || 0) + (totals.drb || 0);
+    }
+    totals.seasons = [...new Set(rows.map(r => r.season))];
+    return totals;
+}
+
+/** Formats a per-game rate from a totals object produced by sumStatRows. */
+function perGame(totals, key) {
+    if (!totals || !totals.gp) return '0.0';
+    return (totals[key] / totals.gp).toFixed(1);
+}
+
+/** Formats a shooting percentage (0-100), or "—" if there were no attempts. */
+function shootingPct(made, attempted) {
+    if (!attempted) return '—';
+    return `${((made / attempted) * 100).toFixed(1)}%`;
+}
+
+/** Converts BBGM's height-in-inches to a "6'8"" style string. */
+function formatHeight(hgtInInches) {
+    if (typeof hgtInInches !== 'number') return 'N/A';
+    const feet = Math.floor(hgtInInches / 12);
+    const inches = hgtInInches % 12;
+    return `${feet}'${inches}"`;
+}
+
+/** Looks up a team's win-loss record for a given season from team.seasons[]. */
+function getTeamRecord(team, season) {
+    if (!team || !team.seasons || team.seasons.length === 0) return null;
+    const entry = season !== undefined && season !== null
+        ? team.seasons.find(s => s.season === season)
+        : team.seasons[team.seasons.length - 1];
+    if (!entry) return null;
+    return { won: entry.won || 0, lost: entry.lost || 0, season: entry.season };
+}
+
 module.exports = {
     loadSaveFile,
     getTeam,
@@ -371,5 +517,16 @@ module.exports = {
     validateAndStoreSave,
     getExpiringContracts,
     getCurrentSeason,
-    isRfaEligible
+    isRfaEligible,
+    getSeasonAttr,
+    findPlayer,
+    getLatestRatings,
+    getRatingsForSeason,
+    getPlayerContract,
+    getStatsForSeason,
+    getCareerStats,
+    perGame,
+    shootingPct,
+    formatHeight,
+    getTeamRecord
 };
