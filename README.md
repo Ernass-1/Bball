@@ -83,6 +83,18 @@ A Discord bot base for managing Basketball GM leagues.
 
 *   **/admin backup**: (Commissioner only) Forces an immediate backup to GitHub.
 
+*   **/player [name]**: Shows a player's profile card — team, position, age, height, overall/potential, contract, and current-season per-game stats. Accepts partial/case-insensitive names.
+
+*   **/roster [team]**: Lists every player on a team (sorted by position, then overall), with age, OVR, POT, and salary, plus total payroll. Defaults to your own claimed team if no team is given.
+
+*   **/stats [name] [season] [career]**: Shows a player's per-game stat line (PTS/REB/AST/STL/BLK/TOV, shooting splits) for a given season (defaults to the current season), or pass `career:true` for career totals.
+
+*   **/ratings [name] [season]**: Shows a player's full ratings breakdown (all attributes, overall, potential, and skills) for a given season (defaults to the most recent).
+
+*   **/standings [season]**: Shows league standings (wins, losses, win%) sorted best to worst, for a given season (defaults to the current one).
+
+*   **/leaders [category] [season]**: Shows the top 10 league leaders (min. 10 GP) for a stat category — points, rebounds, assists, steals, or blocks (defaults to points).
+
 4.  **Run the bot:**
     ```bash
     npm start
