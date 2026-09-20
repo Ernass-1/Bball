@@ -1,13 +1,62 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const { hasActiveSave, loadSaveFile, getActiveSavePath, getPickOrder, getDraftProspects, getTeam, draftPlayer, saveSaveFile } = require('../services/saveEditor');
-const { setDraftState, getDraftState, advancePick, getTeamLink } = require('../database/index');
+const { setDraftState, getDraftState, advancePick, getTeamLink, setPickStartedAt } = require('../database/index');
 const { isCommissioner, isBotOwner } = require('../utils/permissions');
 const { getTeamChannel } = require('../services/channelHelper');
 
 // In-memory timer tracker.
-// NOTE: This state is in-memory only and does not survive a bot restart.
-// If the bot restarts mid-draft, the commissioner will need to re-run /draft start for the current season to resume timing.
 let activeTimer = null;
+
+async function resolvePick(client, isRecovery = false) {
+	// Clear any existing timer
+	if (activeTimer) {
+		clearTimeout(activeTimer);
+		activeTimer = null;
+	}
+
+	// Re-read draft state fresh
+	const draftState = getDraftState();
+	if (!draftState) return; // Draft not active
+
+	const activeSavePath = getActiveSavePath();
+	const save = loadSaveFile(activeSavePath);
+	const picks = getPickOrder(save, draftState.season);
+
+	if (draftState.current_pick_index >= picks.length) return; // Draft complete
+
+	const currentPick = picks[draftState.current_pick_index];
+	const team = getTeam(save, currentPick.tid);
+	const teamName = team ? `${team.region} ${team.name}` : 'Unknown Team';
+
+	const channel = await client.channels.fetch(process.env.DRAFT_CHANNEL_ID).catch(() => null);
+	if (!channel) {
+		console.error("Draft channel not found or DRAFT_CHANNEL_ID not set.");
+		return;
+	}
+
+	// Auto-draft best available
+	const prospects = getDraftProspects(save, draftState.season);
+	if (prospects.length === 0) {
+		channel.send("No prospects available to auto-draft.");
+		return;
+	}
+	const bestProspect = prospects[0];
+	const playerName = `${bestProspect.firstName} ${bestProspect.lastName}`;
+
+	try {
+		const updatedSave = draftPlayer(save, playerName, currentPick.tid, draftState.current_pick_index, draftState.season);
+		saveSaveFile(updatedSave, activeSavePath);
+		advancePick();
+
+		const prefix = isRecovery ? "⌛ Bot was offline — " : "⌛ Time expired — ";
+		channel.send(`${prefix}**${teamName}** auto-drafted **${playerName}** (best available).`);
+
+		// Start timer for next pick
+		await startPickTimer(client);
+	} catch (error) {
+		channel.send(`Error during auto-draft: ${error.message}`);
+	}
+}
 
 async function startPickTimer(client) {
 	// Clear any existing timer first
@@ -24,6 +73,10 @@ async function startPickTimer(client) {
 	const picks = getPickOrder(save, draftState.season);
 
 	if (draftState.current_pick_index >= picks.length) return; // Draft complete
+
+	// Stamp the start time in the database
+	const now = new Date();
+	setPickStartedAt(now.toISOString());
 
 	const pickSeconds = parseInt(process.env.DRAFT_PICK_SECONDS) || 90;
 	const channel = await client.channels.fetch(process.env.DRAFT_CHANNEL_ID).catch(() => null);
@@ -50,33 +103,7 @@ async function startPickTimer(client) {
 
 	// Auto-pick timer
 	activeTimer = setTimeout(async () => {
-		// Re-read draft state fresh
-		const currentState = getDraftState();
-		if (!currentState || currentState.current_pick_index !== draftState.current_pick_index) {
-			return; // Pick already happened or state changed
-		}
-
-		// Auto-draft best available
-		const prospects = getDraftProspects(save, draftState.season);
-		if (prospects.length === 0) {
-			channel.send("No prospects available to auto-draft.");
-			return;
-		}
-		const bestProspect = prospects[0];
-		const playerName = `${bestProspect.firstName} ${bestProspect.lastName}`;
-
-		try {
-			const updatedSave = draftPlayer(save, playerName, currentPick.tid, draftState.current_pick_index, draftState.season);
-			saveSaveFile(updatedSave, activeSavePath);
-			advancePick();
-
-			channel.send(`⌛ Time expired — **${teamName}** auto-drafted **${playerName}** (best available).`);
-
-			// Start timer for next pick
-			startPickTimer(client);
-		} catch (error) {
-			channel.send(`Error during auto-draft: ${error.message}`);
-		}
+		await resolvePick(client);
 	}, pickSeconds * 1000);
 }
 
@@ -201,7 +228,7 @@ module.exports = {
 			const team = getTeam(save, firstPick.tid);
 			
 			// Start the timer
-			startPickTimer(interaction.client);
+			await startPickTimer(interaction.client);
 
 			return interaction.reply({ 
 				content: `📢 **The ${season} Draft has officially started!**\nOn the clock: **${team ? team.region + ' ' + team.name : 'Unknown Team'}** (Round ${firstPick.round}, Pick ${firstPick.pick})` 
@@ -276,7 +303,7 @@ module.exports = {
 					followUp = `Next on the clock: **${nextTeam ? nextTeam.region + ' ' + nextTeam.name : 'Unknown Team'}**.`;
 					
 					// Start timer for next pick
-					startPickTimer(interaction.client);
+					await startPickTimer(interaction.client);
 				}
 
 				return interaction.reply({ 
