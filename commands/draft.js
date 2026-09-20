@@ -3,6 +3,7 @@ const { hasActiveSave, loadSaveFile, getActiveSavePath, getPickOrder, getDraftPr
 const { setDraftState, getDraftState, advancePick, getTeamLink, setPickStartedAt } = require('../database/index');
 const { isCommissioner, isBotOwner } = require('../utils/permissions');
 const { getTeamChannel } = require('../services/channelHelper');
+const { getConfiguredChannelId } = require('../utils/config');
 
 // In-memory timer tracker.
 let activeTimer = null;
@@ -28,9 +29,10 @@ async function resolvePick(client, isRecovery = false) {
 	const team = getTeam(save, currentPick.tid);
 	const teamName = team ? `${team.region} ${team.name}` : 'Unknown Team';
 
-	const channel = await client.channels.fetch(process.env.DRAFT_CHANNEL_ID).catch(() => null);
+	const draftChannelId = getConfiguredChannelId('draft');
+	const channel = await client.channels.fetch(draftChannelId).catch(() => null);
 	if (!channel) {
-		console.error("Draft channel not found or DRAFT_CHANNEL_ID not set.");
+		console.error("Draft channel not found or not configured.");
 		return;
 	}
 
@@ -79,10 +81,11 @@ async function startPickTimer(client) {
 	setPickStartedAt(now.toISOString());
 
 	const pickSeconds = parseInt(process.env.DRAFT_PICK_SECONDS) || 90;
-	const channel = await client.channels.fetch(process.env.DRAFT_CHANNEL_ID).catch(() => null);
+	const draftChannelId = getConfiguredChannelId('draft');
+	const channel = await client.channels.fetch(draftChannelId).catch(() => null);
 
 	if (!channel) {
-		console.error("Draft channel not found or DRAFT_CHANNEL_ID not set.");
+		console.error("Draft channel not found or not configured.");
 		return;
 	}
 
