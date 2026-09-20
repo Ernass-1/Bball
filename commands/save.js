@@ -1,6 +1,7 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const { SlashCommandBuilder, AttachmentBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { getActiveSavePath, hasActiveSave, validateAndStoreSave } = require('../services/saveEditor');
 const { isCommissioner } = require('../utils/permissions');
+const { listSnapshots, restoreSnapshot, backupToGitHub } = require('../services/dataBackup');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -19,9 +20,22 @@ module.exports = {
 		.addSubcommand(subcommand =>
 			subcommand
 				.setName('export')
-				.setDescription('Export the current active save file')),
+				.setDescription('Export the current active save file'))
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('history')
+				.setDescription('List past save snapshots'))
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('restore')
+				.setDescription('Restore the league to a past snapshot')
+				.addStringOption(option =>
+					option.setName('timestamp')
+						.setDescription('The timestamp of the snapshot to restore (from /save history)')
+						.setRequired(true))),
 	async execute(interaction) {
-		if (interaction.options.getSubcommand() === 'upload') {
+		const subcommand = interaction.options.getSubcommand();
+		if (subcommand === 'upload') {
 			if (!isCommissioner(interaction.member)) {
 				return interaction.reply({ content: "You don't have permission to do that.", ephemeral: true });
 			}
@@ -82,6 +96,39 @@ module.exports = {
 
 			const file = new AttachmentBuilder(getActiveSavePath(), { name: 'active_save.json' });
 			await interaction.reply({ content: 'Here is the current active save file:', files: [file] });
+		} else if (subcommand === 'history') {
+			if (!isCommissioner(interaction.member)) {
+				return interaction.reply({ content: "You don't have permission to do that.", ephemeral: true });
+			}
+			await interaction.deferReply({ ephemeral: true });
+			try {
+				const snapshots = await listSnapshots();
+				if (snapshots.length === 0) return interaction.editReply("No snapshots found.");
+
+				const list = snapshots.slice(0, 15).map(s => `\`${s.timestamp}\``).join('\n');
+				const embed = new EmbedBuilder()
+					.setTitle('Save Snapshot History')
+					.setDescription(`Most recent ${Math.min(snapshots.length, 15)} snapshots:\n\n${list}\n\nUse \`/save restore timestamp:<timestamp>\` to revert.`)
+					.setFooter({ text: `Total snapshots: ${snapshots.length}` });
+
+				await interaction.editReply({ embeds: [embed] });
+			} catch (error) {
+				await interaction.editReply(`Error: ${error.message}`);
+			}
+		} else if (subcommand === 'restore') {
+			if (!isCommissioner(interaction.member)) {
+				return interaction.reply({ content: "You don't have permission to do that.", ephemeral: true });
+			}
+			const timestamp = interaction.options.getString('timestamp');
+			const row = new ActionRowBuilder().addComponents(
+				new ButtonBuilder().setCustomId(`confirm_restore_${timestamp}`).setLabel('Confirm Restore').setStyle(ButtonStyle.Danger),
+				new ButtonBuilder().setCustomId('cancel_restore').setLabel('Cancel').setStyle(ButtonStyle.Secondary)
+			);
+			await interaction.reply({
+				content: `⚠️ **WARNING**: About to restore save from \`${timestamp}\`. This overwrites current state. Bot records (trades/offers) are NOT rolled back.`,
+				components: [row],
+				ephemeral: true
+			});
 		}
 	},
 };
