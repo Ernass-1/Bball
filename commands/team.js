@@ -2,7 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionFlagsBits } = 
 const { hasActiveSave, loadSaveFile, getActiveSavePath, resolveTeamId, getTeam } = require('../services/saveEditor.js');
 const { isTeamClaimed, upsertTeamRole, getRoleForTeam, upsertTeamChannel, getChannelForTeam } = require('../database/index.js');
 const { isCommissioner } = require('../utils/permissions.js');
-const { getConfiguredRoleId } = require('../utils/config.js');
+const { getConfiguredRoleId, getConfiguredChannelId } = require('../utils/config.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -208,7 +208,7 @@ module.exports = {
 			return interaction.reply({ content: 'That team is already claimed.', ephemeral: true });
 		}
 
-		const channelId = process.env.COMMISH_CHANNEL_ID;
+		const channelId = getConfiguredChannelId('commish');
 		const channel = interaction.client.channels.cache.get(channelId);
 
 		if (!channel) {

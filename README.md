@@ -38,6 +38,7 @@ A Discord bot base for managing Basketball GM leagues.
 *   **/config set-channel [purpose] [channel]**: (Administrator/Bot Owner only) Sets the channel for a specific purpose (Commissioner or Draft).
 *   **/config set-role [purpose] [role]**: (Administrator/Bot Owner only) Sets the role for a specific purpose (Commissioner).
 *   **/config show**: (Administrator/Bot Owner only) Displays the current configuration, showing whether values are set via Discord or falling back to environment variables.
+*   **Note**: New commands requiring the commissioner channel, draft channel, or commissioner role must use `getConfiguredChannelId` or `getConfiguredRoleId` helpers instead of reading environment variables directly.
 
 *   **/team list**: Displays a list of all teams in the league, including their full name, abbreviation, and numeric ID.
 
