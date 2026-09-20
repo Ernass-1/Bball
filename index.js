@@ -33,6 +33,36 @@ for (const file of eventFiles) {
 	}
 }
 
+// Global button interaction handler for confirmation flows
+client.on('interactionCreate', async interaction => {
+	if (!interaction.isButton()) return;
+
+	if (interaction.customId === 'cancel_restore') {
+		return interaction.update({ content: 'Restore cancelled.', components: [] });
+	}
+
+	if (interaction.customId.startsWith('confirm_restore_')) {
+		const { isCommissioner } = require('./utils/permissions');
+		if (!isCommissioner(interaction.member)) {
+			return interaction.reply({ content: "You don't have permission to do that.", ephemeral: true });
+		}
+
+		const { restoreSnapshot, backupToGitHub } = require('./services/dataBackup');
+		const timestamp = interaction.customId.replace('confirm_restore_', '');
+		const filename = `active_save_${timestamp.replace(/:/g, '-')}.json`;
+
+		await interaction.update({ content: 'Restoring snapshot...', components: [] });
+
+		try {
+			const result = await restoreSnapshot(filename);
+			await interaction.followUp({ content: `✅ Restored snapshot from \`${timestamp}\` (Teams: ${result.teamCount}, Players: ${result.playerCount}).`, ephemeral: true });
+			backupToGitHub();
+		} catch (error) {
+			await interaction.followUp({ content: `❌ Restore failed: ${error.message}`, ephemeral: true });
+		}
+	}
+});
+
 // Initialize Backup System
 ensureDirectoryExists(getActiveSavePath());
 restoreFromGitHub();

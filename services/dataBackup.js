@@ -3,7 +3,7 @@ const path = require('node:path');
 const { execSync } = require('node:child_process');
 const crypto = require('node:crypto');
 const db = require('../database');
-const { getActiveSavePath } = require('./saveEditor');
+const { getActiveSavePath, validateAndStoreSave } = require('./saveEditor');
 const { HISTORY_FILE } = require('./leagueHistory');
 
 const BACKUP_DIR = path.join('/tmp', 'data-backup-clone');
@@ -82,6 +82,27 @@ function backupToGitHub() {
 
             if (currentHash !== backupHash) {
                 fs.copyFileSync(activeSavePath, backupSavePath);
+
+                // Create snapshot
+                const snapshotsDir = path.join(BACKUP_DIR, 'saves');
+                if (!fs.existsSync(snapshotsDir)) fs.mkdirSync(snapshotsDir, { recursive: true });
+                
+                const timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0] + 'Z';
+                const snapshotFilename = `active_save_${timestamp}.json`;
+                fs.copyFileSync(activeSavePath, path.join(snapshotsDir, snapshotFilename));
+
+                // Prune snapshots
+                const retentionCount = parseInt(process.env.SAVE_SNAPSHOT_RETENTION_COUNT, 10) || 20;
+                const snapshots = fs.readdirSync(snapshotsDir)
+                    .filter(f => f.startsWith('active_save_') && f.endsWith('.json'))
+                    .sort();
+                
+                if (snapshots.length > retentionCount) {
+                    const toDelete = snapshots.slice(0, snapshots.length - retentionCount);
+                    for (const file of toDelete) {
+                        fs.unlinkSync(path.join(snapshotsDir, file));
+                    }
+                }
             }
         }
 
@@ -156,4 +177,39 @@ function backupHistoryToGitHub() {
     }
 }
 
-module.exports = { restoreFromGitHub, backupToGitHub };
+async function listSnapshots() {
+    const url = `https://api.github.com/repos/${process.env.GITHUB_REPO}/contents/saves?ref=${BRANCH}`;
+    const response = await fetch(url, {
+        headers: { 'Authorization': `token ${process.env.GITHUB_TOKEN}` }
+    });
+
+    if (!response.ok) {
+        if (response.status === 404) return [];
+        throw new Error(`GitHub API error: ${response.statusText}`);
+    }
+
+    const files = await response.json();
+    return files
+        .filter(f => f.name.startsWith('active_save_') && f.name.endsWith('.json'))
+        .map(f => ({
+            filename: f.name,
+            timestamp: f.name.replace('active_save_', '').replace('.json', '').replace(/-/g, ':')
+        }))
+        .sort((a, b) => b.filename.localeCompare(a.filename));
+}
+
+async function restoreSnapshot(filename) {
+    const url = `https://raw.githubusercontent.com/${process.env.GITHUB_REPO}/${BRANCH}/saves/${filename}`;
+    const response = await fetch(url, {
+        headers: { 'Authorization': `token ${process.env.GITHUB_TOKEN}` }
+    });
+
+    if (!response.ok) throw new Error(`Failed to fetch snapshot: ${response.statusText}`);
+    
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const result = validateAndStoreSave(buffer);
+    
+    return result;
+}
+
+module.exports = { restoreFromGitHub, backupToGitHub, listSnapshots, restoreSnapshot };
