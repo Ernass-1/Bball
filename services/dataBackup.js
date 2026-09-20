@@ -64,6 +64,16 @@ function backupToGitHub() {
     backupHistoryToGitHub();
     
     try {
+        // Ensure local clone is on the backup branch before committing/pushing
+        try {
+            runGit(`fetch origin ${BRANCH}`, BACKUP_DIR);
+            runGit(`checkout -B ${BRANCH} origin/${BRANCH}`, BACKUP_DIR);
+        } catch (e) {
+            try {
+                runGit(`checkout -B ${BRANCH}`, BACKUP_DIR);
+            } catch (e2) {}
+        }
+
         // 1. Export DB
         const data = db.getAllData();
         fs.writeFileSync(path.join(BACKUP_DIR, 'data-export.json'), JSON.stringify(data, null, 2));
@@ -116,8 +126,8 @@ function backupToGitHub() {
             console.log('No changes to backup.');
         } catch (e) {
             runGit(`commit -m "Automated backup ${new Date().toISOString()}"`, BACKUP_DIR);
-            runGit(`push origin ${BRANCH}`, BACKUP_DIR);
-            console.log('Backup pushed to GitHub.');
+            runGit(`push origin HEAD:${BRANCH}`, BACKUP_DIR);
+            console.log('bot-data backup pushed to GitHub.');
         }
     } catch (error) {
         console.error('Backup failed:', error);
