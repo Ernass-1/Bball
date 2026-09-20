@@ -1,5 +1,10 @@
 {
-  "team_links": [],
+  "team_links": [
+    {
+      "discord_id": "1045404529908273254",
+      "team_id": 16
+    }
+  ],
   "trades": [],
   "trade_votes": [],
   "trade_assets": [],
