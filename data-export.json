@@ -7,6 +7,12 @@
   "draft_state": [],
   "team_roles": [],
   "team_channels": [],
-  "bot_config": [],
+  "bot_config": [
+    {
+      "config_key": "channel:commish",
+      "config_value": "1403708122090049698",
+      "updated_at": "2026-09-20 15:06:06"
+    }
+  ],
   "rfa_status": []
 }
