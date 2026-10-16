@@ -364,7 +364,7 @@ function executeTradeAssets(save, proposerAssets, proposerTid, recipientAssets, 
             const player = save.players.find(p => p.firstName + " " + p.lastName === asset.player_name && p.tid === recipientTid);
             player.tid = proposerTid;
         } else if (asset.asset_type === 'pick') {
-            const pick = save.draftPicks.find(p => p.season === asset.pick_season && p.round === asset.pick_round && p.tid === proposerTid);
+            const pick = save.draftPicks.find(p => p.season === asset.pick_season && p.round === asset.pick_round && p.tid === recipientTid);
             pick.tid = proposerTid;
         }
     }
