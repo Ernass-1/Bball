@@ -1,10 +1,5 @@
 {
-  "team_links": [
-    {
-      "discord_id": "1045404529908273254",
-      "team_id": 16
-    }
-  ],
+  "team_links": [],
   "trades": [],
   "trade_votes": [],
   "trade_assets": [],
@@ -12,12 +7,6 @@
   "draft_state": [],
   "team_roles": [],
   "team_channels": [],
-  "bot_config": [
-    {
-      "config_key": "channel:commish",
-      "config_value": "1403708122090049698",
-      "updated_at": "2026-09-20 15:06:06"
-    }
-  ],
+  "bot_config": [],
   "rfa_status": []
 }
