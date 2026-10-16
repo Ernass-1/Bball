@@ -31,55 +31,122 @@ function decompressIfNeeded(buffer) {
     // Check for zip magic number: 0x50 0x4b 0x03 0x04
     if (buffer.length >= 4 && buffer[0] === 0x50 && buffer[1] === 0x4b && buffer[2] === 0x03 && buffer[3] === 0x04) {
         try {
-            let offset = 0;
             let targetEntry = null;
             let firstEntry = null;
 
-            while (offset < buffer.length - 4) {
-                const signature = buffer.readUInt32LE(offset);
-                if (signature !== 0x04034b50) break; // Not a local file header anymore
-
-                if (offset + 30 > buffer.length) break;
-                const compressionMethod = buffer.readUInt16LE(offset + 8);
-                const compressedSize = buffer.readUInt32LE(offset + 18);
-                const fileNameLength = buffer.readUInt16LE(offset + 26);
-                const extraFieldLength = buffer.readUInt16LE(offset + 28);
-
-                const fileNameOffset = offset + 30;
-                const dataOffset = fileNameOffset + fileNameLength + extraFieldLength;
-
-                if (dataOffset + compressedSize > buffer.length) break;
-
-                const fileName = buffer.toString('utf8', fileNameOffset, fileNameOffset + fileNameLength);
-                const entry = {
-                    compressionMethod,
-                    compressedSize,
-                    dataOffset,
-                    fileName
-                };
-
-                if (!firstEntry) firstEntry = entry;
-                if (fileName.toLowerCase().endsWith('.json')) {
-                    targetEntry = entry;
+            // Try parsing via Central Directory first (most robust)
+            // Find End of Central Directory (EOCD) signature: 0x06054b50
+            let eocdOffset = -1;
+            for (let i = buffer.length - 22; i >= 0 && i >= buffer.length - 65558; i--) {
+                if (buffer.readUInt32LE(i) === 0x06054b50) {
+                    eocdOffset = i;
                     break;
                 }
+            }
 
-                offset = dataOffset + compressedSize;
+            if (eocdOffset !== -1) {
+                const totalEntries = buffer.readUInt16LE(eocdOffset + 10);
+                const cdOffset = buffer.readUInt32LE(eocdOffset + 16);
+
+                let cdPtr = cdOffset;
+                for (let i = 0; i < totalEntries; i++) {
+                    if (cdPtr + 46 > buffer.length) break;
+                    const sig = buffer.readUInt32LE(cdPtr);
+                    if (sig !== 0x02014b50) break;
+
+                    const compressionMethod = buffer.readUInt16LE(cdPtr + 10);
+                    const compressedSize = buffer.readUInt32LE(cdPtr + 20);
+                    const fileNameLength = buffer.readUInt16LE(cdPtr + 28);
+                    const extraFieldLength = buffer.readUInt16LE(cdPtr + 30);
+                    const fileCommentLength = buffer.readUInt16LE(cdPtr + 32);
+                    const localHeaderOffset = buffer.readUInt32LE(cdPtr + 42);
+
+                    const fileNameOffset = cdPtr + 46;
+                    const fileName = buffer.toString('utf8', fileNameOffset, fileNameOffset + fileNameLength);
+
+                    const entry = {
+                        compressionMethod,
+                        compressedSize,
+                        localHeaderOffset,
+                        fileName
+                    };
+
+                    if (!firstEntry) firstEntry = entry;
+                    if (fileName.toLowerCase().endsWith('.json')) {
+                        targetEntry = entry;
+                        break;
+                    }
+
+                    cdPtr = fileNameOffset + fileNameLength + extraFieldLength + fileCommentLength;
+                }
             }
 
             const chosen = targetEntry || firstEntry;
-            if (!chosen) {
-                throw new Error("No valid files found inside zip archive.");
+
+            let compressedData, compressionMethod;
+
+            if (chosen && chosen.localHeaderOffset !== undefined) {
+                // Read local header to get exact data offset
+                const lhOffset = chosen.localHeaderOffset;
+                if (lhOffset + 30 <= buffer.length) {
+                    const fileNameLength = buffer.readUInt16LE(lhOffset + 26);
+                    const extraFieldLength = buffer.readUInt16LE(lhOffset + 28);
+                    const dataOffset = lhOffset + 30 + fileNameLength + extraFieldLength;
+                    compressedData = buffer.subarray(dataOffset, dataOffset + chosen.compressedSize);
+                    compressionMethod = chosen.compressionMethod;
+                }
             }
 
-            const compressedData = buffer.subarray(chosen.dataOffset, chosen.dataOffset + chosen.compressedSize);
+            // Fallback to previous local header sequential parsing if EOCD wasn't found or failed
+            if (!compressedData) {
+                let offset = 0;
+                let fallbackTarget = null;
+                let fallbackFirst = null;
 
-            if (chosen.compressionMethod === 0) {
+                while (offset < buffer.length - 4) {
+                    const signature = buffer.readUInt32LE(offset);
+                    if (signature !== 0x04034b50) break;
+
+                    if (offset + 30 > buffer.length) break;
+                    const method = buffer.readUInt16LE(offset + 8);
+                    const compSize = buffer.readUInt32LE(offset + 18);
+                    const fnLen = buffer.readUInt16LE(offset + 26);
+                    const exLen = buffer.readUInt16LE(offset + 28);
+
+                    const dataOffset = offset + 30 + fnLen + exLen;
+                    if (dataOffset + compSize > buffer.length) break;
+
+                    const fileName = buffer.toString('utf8', offset + 30, offset + 30 + fnLen);
+                    const entry = {
+                        compressionMethod: method,
+                        compressedSize: compSize,
+                        dataOffset,
+                        fileName
+                    };
+
+                    if (!fallbackFirst) fallbackFirst = entry;
+                    if (fileName.toLowerCase().endsWith('.json')) {
+                        fallbackTarget = entry;
+                        break;
+                    }
+
+                    offset = dataOffset + compSize;
+                }
+
+                const fallbackChosen = fallbackTarget || fallbackFirst;
+                if (!fallbackChosen) {
+                    throw new Error("No valid files found inside zip archive.");
+                }
+                compressedData = buffer.subarray(fallbackChosen.dataOffset, fallbackChosen.dataOffset + fallbackChosen.compressedSize);
+                compressionMethod = fallbackChosen.compressionMethod;
+            }
+
+            if (compressionMethod === 0) {
                 return compressedData;
-            } else if (chosen.compressionMethod === 8) {
+            } else if (compressionMethod === 8) {
                 return zlib.inflateRawSync(compressedData);
             } else {
-                throw new Error(`Unsupported zip compression method: ${chosen.compressionMethod}`);
+                throw new Error(`Unsupported zip compression method: ${compressionMethod}`);
             }
         } catch (error) {
             throw new Error(`File looked zip-compressed but failed to decompress: ${error.message}`);
@@ -297,7 +364,7 @@ function executeTradeAssets(save, proposerAssets, proposerTid, recipientAssets, 
             const player = save.players.find(p => p.firstName + " " + p.lastName === asset.player_name && p.tid === recipientTid);
             player.tid = proposerTid;
         } else if (asset.asset_type === 'pick') {
-            const pick = save.draftPicks.find(p => p.season === asset.pick_season && p.round === asset.pick_round && p.tid === recipientTid);
+            const pick = save.draftPicks.find(p => p.season === asset.pick_season && p.round === asset.pick_round && p.tid === proposerTid);
             pick.tid = proposerTid;
         }
     }
