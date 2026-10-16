@@ -31,20 +31,55 @@ function decompressIfNeeded(buffer) {
     // Check for zip magic number: 0x50 0x4b 0x03 0x04
     if (buffer.length >= 4 && buffer[0] === 0x50 && buffer[1] === 0x4b && buffer[2] === 0x03 && buffer[3] === 0x04) {
         try {
-            const compressionMethod = buffer.readUInt16LE(8);
-            const fileNameLength = buffer.readUInt16LE(26);
-            const extraFieldLength = buffer.readUInt16LE(28);
-            const compressedSize = buffer.readUInt32LE(18);
-            
-            const dataOffset = 30 + fileNameLength + extraFieldLength;
-            const compressedData = buffer.subarray(dataOffset, dataOffset + compressedSize);
+            let offset = 0;
+            let targetEntry = null;
+            let firstEntry = null;
 
-            if (compressionMethod === 0) {
+            while (offset < buffer.length - 4) {
+                const signature = buffer.readUInt32LE(offset);
+                if (signature !== 0x04034b50) break; // Not a local file header anymore
+
+                if (offset + 30 > buffer.length) break;
+                const compressionMethod = buffer.readUInt16LE(offset + 8);
+                const compressedSize = buffer.readUInt32LE(offset + 18);
+                const fileNameLength = buffer.readUInt16LE(offset + 26);
+                const extraFieldLength = buffer.readUInt16LE(offset + 28);
+
+                const fileNameOffset = offset + 30;
+                const dataOffset = fileNameOffset + fileNameLength + extraFieldLength;
+
+                if (dataOffset + compressedSize > buffer.length) break;
+
+                const fileName = buffer.toString('utf8', fileNameOffset, fileNameOffset + fileNameLength);
+                const entry = {
+                    compressionMethod,
+                    compressedSize,
+                    dataOffset,
+                    fileName
+                };
+
+                if (!firstEntry) firstEntry = entry;
+                if (fileName.toLowerCase().endsWith('.json')) {
+                    targetEntry = entry;
+                    break;
+                }
+
+                offset = dataOffset + compressedSize;
+            }
+
+            const chosen = targetEntry || firstEntry;
+            if (!chosen) {
+                throw new Error("No valid files found inside zip archive.");
+            }
+
+            const compressedData = buffer.subarray(chosen.dataOffset, chosen.dataOffset + chosen.compressedSize);
+
+            if (chosen.compressionMethod === 0) {
                 return compressedData;
-            } else if (compressionMethod === 8) {
+            } else if (chosen.compressionMethod === 8) {
                 return zlib.inflateRawSync(compressedData);
             } else {
-                throw new Error(`Unsupported zip compression method: ${compressionMethod}`);
+                throw new Error(`Unsupported zip compression method: ${chosen.compressionMethod}`);
             }
         } catch (error) {
             throw new Error(`File looked zip-compressed but failed to decompress: ${error.message}`);
