@@ -28,6 +28,28 @@ function decompressIfNeeded(buffer) {
             throw new Error("File looked gzip-compressed but failed to decompress — it may be corrupted.");
         }
     }
+    // Check for zip magic number: 0x50 0x4b 0x03 0x04
+    if (buffer.length >= 4 && buffer[0] === 0x50 && buffer[1] === 0x4b && buffer[2] === 0x03 && buffer[3] === 0x04) {
+        try {
+            const compressionMethod = buffer.readUInt16LE(8);
+            const fileNameLength = buffer.readUInt16LE(26);
+            const extraFieldLength = buffer.readUInt16LE(28);
+            const compressedSize = buffer.readUInt32LE(18);
+            
+            const dataOffset = 30 + fileNameLength + extraFieldLength;
+            const compressedData = buffer.subarray(dataOffset, dataOffset + compressedSize);
+
+            if (compressionMethod === 0) {
+                return compressedData;
+            } else if (compressionMethod === 8) {
+                return zlib.inflateRawSync(compressedData);
+            } else {
+                throw new Error(`Unsupported zip compression method: ${compressionMethod}`);
+            }
+        } catch (error) {
+            throw new Error(`File looked zip-compressed but failed to decompress: ${error.message}`);
+        }
+    }
     return buffer;
 }
 
