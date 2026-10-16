@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import shared_info
 exports = shared_info.serverExports
 import basics
@@ -141,7 +145,3 @@ async def process_text(text, message):
                 text = '\n'.join(newLines)
                 embed.add_field(name="ClevelandBot Help", value=text)
             await message.channel.send(embed=embed)
-
-
-
-
