@@ -12,6 +12,8 @@ const BRANCH = process.env.DATA_BACKUP_BRANCH || 'bot-data';
 const HISTORY_BRANCH = process.env.HISTORY_BRANCH || 'bot-history';
 const PUSHED_OFFSET_FILE = path.join(process.cwd(), 'data', '.history_pushed_offset');
 
+let lastBackupTime = null;
+
 function runGit(args, cwd = BACKUP_DIR) {
     return execSync(`git ${args}`, { cwd, stdio: 'pipe' });
 }
@@ -127,6 +129,7 @@ function backupToGitHub() {
         } catch (e) {
             runGit(`commit -m "Automated backup ${new Date().toISOString()}"`, BACKUP_DIR);
             runGit(`push origin HEAD:${BRANCH}`, BACKUP_DIR);
+            lastBackupTime = new Date();
             console.log('bot-data backup pushed to GitHub.');
         }
     } catch (error) {
@@ -222,4 +225,8 @@ async function restoreSnapshot(filename) {
     return result;
 }
 
-module.exports = { restoreFromGitHub, backupToGitHub, listSnapshots, restoreSnapshot };
+function getLastBackupInfo() {
+    return lastBackupTime;
+}
+
+module.exports = { restoreFromGitHub, backupToGitHub, listSnapshots, restoreSnapshot, getLastBackupInfo };
