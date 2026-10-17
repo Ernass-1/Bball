@@ -1,0 +1,1174 @@
+[
+	{
+		"booknumber" : 1,
+		"shortname" : "Genesis",
+		"contentsname" : "Book of Genesis",
+		"bookname" : "THE BOOK OF GENESIS",
+		"bookdesc" : "This book is so called from its treating of the GENERATION, that is, of the creation and the beginning of the world.  The Hebrews call it BERESITH, from the Word with which it begins.  It contains not only the history of the Creation of the world; but also an account of its progress during the space of 2369 years, that is, until the death of JOSEPH.",
+		"chapters" : [
+			{
+				"chaptername" : "Genesis Chapter 1",
+				"chapterdesc" : "God createth Heaven and Earth, and all things therein, in six days.",
+				"chapternumber" : 1
+			},
+			{
+				"chaptername" : "Genesis Chapter 2",
+				"chapterdesc" : "God resteth on the seventh day and blesseth it.  The earthly paradise, in which God placeth man.  He commandeth him not to eat of the tree of knowledge.  And formeth a woman of his rib.",
+				"chapternumber" : 2
+			},
+			{
+				"chaptername" : "Genesis Chapter 3",
+				"chapterdesc" : "The serpent's craft.  The fall of our first parents.  Their punishment. The promise of a Redeemer.",
+				"chapternumber" : 3
+			},
+			{
+				"chaptername" : "Genesis Chapter 4",
+				"chapterdesc" : "The history of Cain and Abel.",
+				"chapternumber" : 4
+			},
+			{
+				"chaptername" : "Genesis Chapter 5",
+				"chapterdesc" : "The genealogy, age, and death of the Patriarchs, from Adam to Noe.  The translation of Henoch.",
+				"chapternumber" : 5
+			},
+			{
+				"chaptername" : "Genesis Chapter 6",
+				"chapterdesc" : "Man's sin is the cause of the deluge.  Noe is commanded to build the ark.",
+				"chapternumber" : 6
+			},
+			{
+				"chaptername" : "Genesis Chapter 7",
+				"chapterdesc" : "Noe with his family go into the ark.  The deluge overflows the earth.",
+				"chapternumber" : 7
+			},
+			{
+				"chaptername" : "Genesis Chapter 8",
+				"chapterdesc" : "The deluge ceaseth.  Noe goeth out of the ark, and offereth a sacrifice. God's covenant to him.",
+				"chapternumber" : 8
+			},
+			{
+				"chaptername" : "Genesis Chapter 9",
+				"chapterdesc" : "God blesseth Noe:  forbiddeth blood, and promiseth never more to destroy the world by water.  The blessing of Sem and Japheth.",
+				"chapternumber" : 9
+			},
+			{
+				"chaptername" : "Genesis Chapter 10",
+				"chapterdesc" : "The genealogy of the children of Noe, by whom the world was peopled after the flood.",
+				"chapternumber" : 10
+			},
+			{
+				"chaptername" : "Genesis Chapter 11",
+				"chapterdesc" : "The tower of Babel.  The confusion of tongues.  The genealogy of Sem down to Abram.",
+				"chapternumber" : 11
+			},
+			{
+				"chaptername" : "Genesis Chapter 12",
+				"chapterdesc" : "The call of Abram, and the promise made to him.  He sojourneth in Chanaan, and then by occasion of a famine, goeth down to Egypt.",
+				"chapternumber" : 12
+			},
+			{
+				"chaptername" : "Genesis Chapter 13",
+				"chapterdesc" : "Abram and Lot part from each other.  God's promise to Abram.",
+				"chapternumber" : 13
+			},
+			{
+				"chaptername" : "Genesis Chapter 14",
+				"chapterdesc" : "The expedition of the four kings; the victory of Abram; he is blessed by Melchisedech.",
+				"chapternumber" : 14
+			},
+			{
+				"chaptername" : "Genesis Chapter 15",
+				"chapterdesc" : "God promiseth seed to Abram.  His faith, sacrifice and vision.",
+				"chapternumber" : 15
+			},
+			{
+				"chaptername" : "Genesis Chapter 16",
+				"chapterdesc" : "Abram marrieth Agar, who bringeth forth Ismael.",
+				"chapternumber" : 16
+			},
+			{
+				"chaptername" : "Genesis Chapter 17",
+				"chapterdesc" : "The Covenant of circumcision.",
+				"chapternumber" : 17
+			},
+			{
+				"chaptername" : "Genesis Chapter 18",
+				"chapterdesc" : "Angels are entertained by Abraham.  They foretell the birth of Isaac. Abraham's prayer for the men of Sodom.",
+				"chapternumber" : 18
+			},
+			{
+				"chaptername" : "Genesis Chapter 19",
+				"chapterdesc" : "Lot, entertaining Angels in his house, is delivered from Sodom, which is destroyed:  his wife for looking back is turned into a statue of salt.",
+				"chapternumber" : 19
+			},
+			{
+				"chaptername" : "Genesis Chapter 20",
+				"chapterdesc" : "Abraham sojourned in Gerara:  Sara is taken into king Abimelech's house, but by God's commandment is restored untouched.",
+				"chapternumber" : 20
+			},
+			{
+				"chaptername" : "Genesis Chapter 21",
+				"chapterdesc" : "Isaac is born.  Agar and Ismael are cast forth.",
+				"chapternumber" : 21
+			},
+			{
+				"chaptername" : "Genesis Chapter 22",
+				"chapterdesc" : "The faith and obedience of Abraham is proved in his readiness to sacrifice his son Isaac.  He is stayed from the act by an angel.  Former promises are renewed to him.  His brother Nachor's issue.",
+				"chapternumber" : 22
+			},
+			{
+				"chaptername" : "Genesis Chapter 23",
+				"chapterdesc" : "Sara's death and burial in the field bought of Ephron.",
+				"chapternumber" : 23
+			},
+			{
+				"chaptername" : "Genesis Chapter 24",
+				"chapterdesc" : "Abraham's servant, sent by him into Mesopotamia, bringeth from thence Rebecca, who is married to Isaac.",
+				"chapternumber" : 24
+			},
+			{
+				"chaptername" : "Genesis Chapter 25",
+				"chapterdesc" : "Abraham's children by Cetura; his death and that of Ismael.  Isaac hath Esau and Jacob twins.  Esau selleth his first birthright to Jacob.",
+				"chapternumber" : 25
+			},
+			{
+				"chaptername" : "Genesis Chapter 26",
+				"chapterdesc" : "Isaac sojourneth in Gerara, where God reneweth to him the promise made to Abraham.  King Abimelech maketh league with him.",
+				"chapternumber" : 26
+			},
+			{
+				"chaptername" : "Genesis Chapter 27",
+				"chapterdesc" : "Jacob, by him mother's counsel, obtaineth his father's blessing instead of Esau.  And by her is advised to fly to his uncle Laban.",
+				"chapternumber" : 27
+			},
+			{
+				"chaptername" : "Genesis Chapter 28",
+				"chapterdesc" : "Jacob's journey to Mesopotamia:  his vision and vow.",
+				"chapternumber" : 28
+			},
+			{
+				"chaptername" : "Genesis Chapter 29",
+				"chapterdesc" : "Jacob serveth Laban seven years for Rachel:  but is deceived with Lia: he afterwards marrieth Rachel.  Lia bears him four sons.",
+				"chapternumber" : 29
+			},
+			{
+				"chaptername" : "Genesis Chapter 30",
+				"chapterdesc" : "Rachel, being barren, delivereth her handmaid to Jacob; she beareth two sons.  Lia ceasing to bear, giveth also her handmaid, and she beareth two more.  Then Lia beareth other two sons and one daughter.  Rachel beareth Joseph.  Jacob, desirous to return home, is hired to stay for a certain part of the flock's increase, whereby he becometh exceeding rich.",
+				"chapternumber" : 30
+			},
+			{
+				"chaptername" : "Genesis Chapter 31",
+				"chapterdesc" : "Jacob's departure:  he is pursued and overtaken by Laban.  They make a covenant.",
+				"chapternumber" : 31
+			},
+			{
+				"chaptername" : "Genesis Chapter 32",
+				"chapterdesc" : "Jacob's vision of angels; his message and presents to Esau; his wrestling with an angel.",
+				"chapternumber" : 32
+			},
+			{
+				"chaptername" : "Genesis Chapter 33",
+				"chapterdesc" : "Jacob and Esau meet:  Jacob goeth to Salem, where he raiseth an altar.",
+				"chapternumber" : 33
+			},
+			{
+				"chaptername" : "Genesis Chapter 34",
+				"chapterdesc" : "Dina is ravished, for which the Sichemites are destroyed.",
+				"chapternumber" : 34
+			},
+			{
+				"chaptername" : "Genesis Chapter 35",
+				"chapterdesc" : "Jacob purgeth his family from idols:  goeth by God's commandment to Bethel, and there buildeth an altar.  God appearing again to Jacob blesseth him, and changeth his name into Israel.  Rachel dieth in childbirth.  Isaac also dieth.",
+				"chapternumber" : 35
+			},
+			{
+				"chaptername" : "Genesis Chapter 36",
+				"chapterdesc" : "Esau with his wives and children parteth from Jacob.  An account of his descendants, and of the first kings of Edom.",
+				"chapternumber" : 36
+			},
+			{
+				"chaptername" : "Genesis Chapter 37",
+				"chapterdesc" : "Joseph's dreams:  he is sold by his brethren, and carried into Egypt.",
+				"chapternumber" : 37
+			},
+			{
+				"chaptername" : "Genesis Chapter 38",
+				"chapterdesc" : "The sons of Juda:  the death of Her and Onan:  the birth of Phares and Zara.",
+				"chapternumber" : 38
+			},
+			{
+				"chaptername" : "Genesis Chapter 39",
+				"chapterdesc" : "Joseph hath charge of his master's house:  rejecteth his mistress's solicitations:  is falsely accused by her, and cast into prison, where he hath the charge of all the prisoners.",
+				"chapternumber" : 39
+			},
+			{
+				"chaptername" : "Genesis Chapter 40",
+				"chapterdesc" : "Joseph interpreteth the dreams of two of Pharao's servants in prison: the event declareth the interpretations to be true, but Joseph is forgotten.",
+				"chapternumber" : 40
+			},
+			{
+				"chaptername" : "Genesis Chapter 41",
+				"chapterdesc" : "Joseph interpreteth the two dreams of Pharao:  he is made ruler over all Egypt.",
+				"chapternumber" : 41
+			},
+			{
+				"chaptername" : "Genesis Chapter 42",
+				"chapterdesc" : "Jacob sendeth his ten sons to buy corn in Egypt.  Their treatment by Joseph.",
+				"chapternumber" : 42
+			},
+			{
+				"chaptername" : "Genesis Chapter 43",
+				"chapterdesc" : "The sons of Jacob go again into Egypt with Benjamin.  They are entertained by Joseph.",
+				"chapternumber" : 43
+			},
+			{
+				"chaptername" : "Genesis Chapter 44",
+				"chapterdesc" : "Joseph's contrivance to stop his brethren.  The humble supplication of Juda.",
+				"chapternumber" : 44
+			},
+			{
+				"chaptername" : "Genesis Chapter 45",
+				"chapterdesc" : "Joseph maketh himself known to his brethren:  and sendeth for his father.",
+				"chapternumber" : 45
+			},
+			{
+				"chaptername" : "Genesis Chapter 46",
+				"chapterdesc" : "Israel, warranted by a vision from God, goeth down into Egypt with all his family.",
+				"chapternumber" : 46
+			},
+			{
+				"chaptername" : "Genesis Chapter 47",
+				"chapterdesc" : "Jacob and his sons are presented before Pharao:  he giveth them the land of Gessen.  The famine forceth the Egyptians to sell all their possessions to the king.",
+				"chapternumber" : 47
+			},
+			{
+				"chaptername" : "Genesis Chapter 48",
+				"chapterdesc" : "Joseph visiteth his father in his sickness, who adopteth his two sons Manasses and Ephraim, and blesseth them, preferring the younger before the elder.",
+				"chapternumber" : 48
+			},
+			{
+				"chaptername" : "Genesis Chapter 49",
+				"chapterdesc" : "Jacob's prophetical blessings of his twelve sons:  his death.",
+				"chapternumber" : 49
+			},
+			{
+				"chaptername" : "Genesis Chapter 50",
+				"chapterdesc" : "The mourning for Jacob, and his interment.  Joseph's kindness towards his brethren.  His death.",
+				"chapternumber" : 50
+			}
+		]
+	},
+	{
+		"booknumber" : 2,
+		"shortname" : "Exodus",
+		"contentsname" : "Book of Exodus",
+		"bookname" : "THE BOOK OF EXODUS",
+		"bookdesc" : "The Second Book of Moses is called EXODUS, from the Greek word EXODOS, which signifies going out:  because it contains the history of the going out of the children of Israel out of Egypt.  The Hebrews, from the words with which it begins, call it VEELLE SEMOTH:  These are the names.  It contains transactions for 145 years; that is, from the death of Joseph to the erecting of the tabernacle.",
+		"chapters" : [
+			{
+				"chaptername" : "Exodus Chapter 1",
+				"chapterdesc" : "The Israelites are multiplied in Egypt.  They are oppressed by a new king, who commandeth all their male children to be killed.",
+				"chapternumber" : 1
+			},
+			{
+				"chaptername" : "Exodus Chapter 2",
+				"chapterdesc" : "Moses is born and exposed on the bank of the river; where he is taken up by the daughter of Pharao, and adopted for her son.  He killeth an Egyptian, and fleeth into Madian; where he marrieth a wife.",
+				"chapternumber" : 2
+			},
+			{
+				"chaptername" : "Exodus Chapter 3",
+				"chapterdesc" : "God appeareth to Moses in a bush, and sendeth him to deliver Israel.",
+				"chapternumber" : 3
+			},
+			{
+				"chaptername" : "Exodus Chapter 4",
+				"chapterdesc" : "Moses is empowered to confirm his mission with miracles:  his brother Aaron is appointed to assist him.",
+				"chapternumber" : 4
+			},
+			{
+				"chaptername" : "Exodus Chapter 5",
+				"chapterdesc" : "Pharao refuseth to let the people go.  They are more oppressed.",
+				"chapternumber" : 5
+			},
+			{
+				"chaptername" : "Exodus Chapter 6",
+				"chapterdesc" : "God reneweth his promise.  The genealogies of Ruben, Simon and Levi, down to Moses and Aaron. 6;1. And the Lord said to Moses:  Now thou shalt see what I will do to Pharao:  for by a mighty hand shall he let them go, and with a strong hand shall he cast them out of his land.",
+				"chapternumber" : 6
+			},
+			{
+				"chaptername" : "Exodus Chapter 7",
+				"chapterdesc" : "Moses and Aaron go into Pharao:  they turn the rod into a serpent; and the waters of Egypt into blood, which was the first plague.  The magicians do the like, and Pharao's heart is hardened.",
+				"chapternumber" : 7
+			},
+			{
+				"chaptername" : "Exodus Chapter 8",
+				"chapterdesc" : "The second plague is of frogs:  Pharao promiseth to let the Israelites go, but breaketh his promise.  The third plague is of sciniphs.  The fourth is of flies.  Pharao again promiseth to dismiss the people, but doth it not.",
+				"chapternumber" : 8
+			},
+			{
+				"chaptername" : "Exodus Chapter 9",
+				"chapterdesc" : "The fifth plague is a murrain among the cattle.  The sixth, of boils in men and beasts.  The seventh, of hail.  Pharao promiseth again to let the people go, and breaketh his word.",
+				"chapternumber" : 9
+			},
+			{
+				"chaptername" : "Exodus Chapter 10",
+				"chapterdesc" : "The eighth plague of the locusts.  The ninth, of darkness:  Pharao is still hardened.",
+				"chapternumber" : 10
+			},
+			{
+				"chaptername" : "Exodus Chapter 11",
+				"chapterdesc" : "Pharao and his people are threatened with the death of their firstborn.",
+				"chapternumber" : 11
+			},
+			{
+				"chaptername" : "Exodus Chapter 12",
+				"chapterdesc" : "The manner of preparing, and eating the paschal lamb:  the firstborn of Egypt are all slain:  the Israelites depart.",
+				"chapternumber" : 12
+			},
+			{
+				"chaptername" : "Exodus Chapter 13",
+				"chapterdesc" : "The paschal solemnity is to be observed; and the firstborn are to be consecrated to God.  The people are conducted through the desert by a pillar of fire in the night, and a cloud in the day.",
+				"chapternumber" : 13
+			},
+			{
+				"chaptername" : "Exodus Chapter 14",
+				"chapterdesc" : "Pharao pursueth the children of Israel.  They murmur against Moses, but are encouraged by him, and pass through the Red Sea.  Pharao and his army following them are drowned.",
+				"chapternumber" : 14
+			},
+			{
+				"chaptername" : "Exodus Chapter 15",
+				"chapterdesc" : "The canticle of Moses.  The bitter waters of Mara are made sweet.",
+				"chapternumber" : 15
+			},
+			{
+				"chaptername" : "Exodus Chapter 16",
+				"chapterdesc" : "The people murmur for want of meat:  God giveth them quails and manna.",
+				"chapternumber" : 16
+			},
+			{
+				"chaptername" : "Exodus Chapter 17",
+				"chapterdesc" : "The people murmur again for want of drink; the Lord giveth them water out of a rock.  Moses lifting up his hand in prayer, Amalec is overcome.",
+				"chapternumber" : 17
+			},
+			{
+				"chaptername" : "Exodus Chapter 18",
+				"chapterdesc" : "Jethro bringeth to Moses his wife and children.  His counsel.",
+				"chapternumber" : 18
+			},
+			{
+				"chaptername" : "Exodus Chapter 19",
+				"chapterdesc" : "They come to Sinai:  the people are commanded to be sanctified.  The Lord, coming in thunder and lightning, speaketh with Moses.",
+				"chapternumber" : 19
+			},
+			{
+				"chaptername" : "Exodus Chapter 20",
+				"chapterdesc" : "The ten commandments.",
+				"chapternumber" : 20
+			},
+			{
+				"chaptername" : "Exodus Chapter 21",
+				"chapterdesc" : "Laws relating to Justice.",
+				"chapternumber" : 21
+			},
+			{
+				"chaptername" : "Exodus Chapter 22",
+				"chapterdesc" : "The punishment of theft, and other trespasses.  The law of lending without usury, of taking pledges of reverences to superiors, and of paying tithes.",
+				"chapternumber" : 22
+			},
+			{
+				"chaptername" : "Exodus Chapter 23",
+				"chapterdesc" : "Laws for judges; the rest of the seventh year, and day:  three principal feasts to be solemnized every year; the promise of an angel, to conduct and protect them:  idols are to be destroyed.",
+				"chapternumber" : 23
+			},
+			{
+				"chaptername" : "Exodus Chapter 24",
+				"chapterdesc" : "Moses writeth his law; and after offering sacrifices, sprinkleth the blood of the testament upon the people:  then goeth up the mountain which God covereth with a fiery cloud.",
+				"chapternumber" : 24
+			},
+			{
+				"chaptername" : "Exodus Chapter 25",
+				"chapterdesc" : "Offerings prescribed for making the tabernacle, the ark, the candlestick, etc.",
+				"chapternumber" : 25
+			},
+			{
+				"chaptername" : "Exodus Chapter 26",
+				"chapterdesc" : "The form of the tabernacle with its appurtenances.",
+				"chapternumber" : 26
+			},
+			{
+				"chaptername" : "Exodus Chapter 27",
+				"chapterdesc" : "The altar; and the court of the tabernacle with its hangings and pillars.  Provision of oil for lamps.",
+				"chapternumber" : 27
+			},
+			{
+				"chaptername" : "Exodus Chapter 28",
+				"chapterdesc" : "The holy vestments for Aaron and his sons.",
+				"chapternumber" : 28
+			},
+			{
+				"chaptername" : "Exodus Chapter 29",
+				"chapterdesc" : "The manner of consecrating Aaron and other priests; the institution of the daily sacrifice of two lambs, one in the morning, the other at evening.",
+				"chapternumber" : 29
+			},
+			{
+				"chaptername" : "Exodus Chapter 30",
+				"chapterdesc" : "The altar of incense:  money to be gathered for the use of the tabernacle:  the brazen laver:  the holy oil of unction, and the composition of the perfume.",
+				"chapternumber" : 30
+			},
+			{
+				"chaptername" : "Exodus Chapter 31",
+				"chapterdesc" : "Beseleel and Ooliab are appointed by the Lord to make the tabernacle, and the things belonging thereto.  The observation of the sabbath day is again commanded.  And the Lord delivereth to Moses two tables written with the finger of God.",
+				"chapternumber" : 31
+			},
+			{
+				"chaptername" : "Exodus Chapter 32",
+				"chapterdesc" : "The people fall into idolatry.  Moses prayeth for them.  He breaketh the tables:  destroyeth the idol:  blameth Aaron, and causeth many of the idolaters to be slain.",
+				"chapternumber" : 32
+			},
+			{
+				"chaptername" : "Exodus Chapter 33",
+				"chapterdesc" : "The people mourn for their sin.  Moses pitcheth the tabernacle without the camp.  He converseth familiarly with God.  Desireth to see his glory.",
+				"chapternumber" : 33
+			},
+			{
+				"chaptername" : "Exodus Chapter 34",
+				"chapterdesc" : "The tables are renewed:  all society with the Chanaanites is forbid: some precepts concerning the firstborn, the sabbath, and other feasts: after forty days' fast, Moses returneth to the people with the commandments, and his face appearing horned with rays of light, he covereth it, whensoever he speaketh to the people.",
+				"chapternumber" : 34
+			},
+			{
+				"chaptername" : "Exodus Chapter 35",
+				"chapterdesc" : "The sabbath.  Offerings for making the tabernacle.  Beseleel and Ooliab are called to the work.",
+				"chapternumber" : 35
+			},
+			{
+				"chaptername" : "Exodus Chapter 36",
+				"chapterdesc" : "The offerings are delivered to the workmen, the curtains, coverings, boards, bars, veil, pillars, and hanging are made.",
+				"chapternumber" : 36
+			},
+			{
+				"chaptername" : "Exodus Chapter 37",
+				"chapterdesc" : "Beseleel maketh the ark:  the propitiatory, and cherubims, the table, the candlestick, the lamps, and the altar of incense, and compoundeth the incense.",
+				"chapternumber" : 37
+			},
+			{
+				"chaptername" : "Exodus Chapter 38",
+				"chapterdesc" : "He maketh the altar of holocaust.  The brazen laver.  The court with its pillars and hangings.  The sum of what the people offered.",
+				"chapternumber" : 38
+			},
+			{
+				"chaptername" : "Exodus Chapter 39",
+				"chapterdesc" : "All the ornaments of Aaron and his sons are made.  And the whole work of the tabernacle is finished.",
+				"chapternumber" : 39
+			},
+			{
+				"chaptername" : "Exodus Chapter 40",
+				"chapterdesc" : "The tabernacle is commanded to be set up and anointed.  God filleth it with his majesty.",
+				"chapternumber" : 40
+			}
+		]
+	},
+	{
+		"booknumber" : 3,
+		"shortname" : "Leviticus",
+		"contentsname" : "Book of Leviticus",
+		"bookname" : "THE BOOK OF LEVITICUS",
+		"bookdesc" : "This Book is called LEVITICUS, because it treats of the Offices, Ministries, Rites and Ceremonies of the Priests and Levites.  The Hebrews call it VAICRA, from the word with which it begins.",
+		"chapters" : [
+			{
+				"chaptername" : "Leviticus Chapter 1",
+				"chapterdesc" : "Of holocausts or burnt offerings.",
+				"chapternumber" : 1
+			},
+			{
+				"chaptername" : "Leviticus Chapter 2",
+				"chapterdesc" : "Of offerings of flour, and firstfruits.",
+				"chapternumber" : 2
+			},
+			{
+				"chaptername" : "Leviticus Chapter 3",
+				"chapterdesc" : "Of peace offerings.",
+				"chapternumber" : 3
+			},
+			{
+				"chaptername" : "Leviticus Chapter 4",
+				"chapterdesc" : "Of offerings for sins of ignorance.",
+				"chapternumber" : 4
+			},
+			{
+				"chaptername" : "Leviticus Chapter 5",
+				"chapterdesc" : "Of other sacrifices for sins.",
+				"chapternumber" : 5
+			},
+			{
+				"chaptername" : "Leviticus Chapter 6",
+				"chapterdesc" : "Oblation for sins of injustice:  ordinances concerning the holocausts and the perpetual fire:  the sacrifices of the priests, and the sin offerings.",
+				"chapternumber" : 6
+			},
+			{
+				"chaptername" : "Leviticus Chapter 7",
+				"chapterdesc" : "Of sacrifices for trespasses and thanks offerings.  No fat nor blood is to be eaten.",
+				"chapternumber" : 7
+			},
+			{
+				"chaptername" : "Leviticus Chapter 8",
+				"chapterdesc" : "Moses consecrateth Aaron and his sons.",
+				"chapternumber" : 8
+			},
+			{
+				"chaptername" : "Leviticus Chapter 9",
+				"chapterdesc" : "Aaron offereth sacrifice for himself and the people.  Fire cometh from the Lord upon the altar.",
+				"chapternumber" : 9
+			},
+			{
+				"chaptername" : "Leviticus Chapter 10",
+				"chapterdesc" : "Nadab and Abiu for offering strange fire, are burnt by fire.  Priests are forbidden to drink wine, when they enter into the tabernacle.  The law of eating the holy things.",
+				"chapternumber" : 10
+			},
+			{
+				"chaptername" : "Leviticus Chapter 11",
+				"chapterdesc" : "The distinction of clean and unclean animals.",
+				"chapternumber" : 11
+			},
+			{
+				"chaptername" : "Leviticus Chapter 12",
+				"chapterdesc" : "The purification of women after childbirth.",
+				"chapternumber" : 12
+			},
+			{
+				"chaptername" : "Leviticus Chapter 13",
+				"chapterdesc" : "The law concerning leprosy in men, and in garments.",
+				"chapternumber" : 13
+			},
+			{
+				"chaptername" : "Leviticus Chapter 14",
+				"chapterdesc" : "The rites of sacrifices in cleansing the leprosy.  Leprosy in houses.",
+				"chapternumber" : 14
+			},
+			{
+				"chaptername" : "Leviticus Chapter 15",
+				"chapterdesc" : "Other legal uncleannesses.",
+				"chapternumber" : 15
+			},
+			{
+				"chaptername" : "Leviticus Chapter 16",
+				"chapterdesc" : "When and how the high priest must enter into the sanctuary.  The feast of expiation.",
+				"chapternumber" : 16
+			},
+			{
+				"chaptername" : "Leviticus Chapter 17",
+				"chapterdesc" : "No sacrifices to be offered but at the door of the tabernacle:  a prohibition of blood.",
+				"chapternumber" : 17
+			},
+			{
+				"chaptername" : "Leviticus Chapter 18",
+				"chapterdesc" : "Marriage is prohibited in certain degrees of kindred:  Anda all unnatural lusts.",
+				"chapternumber" : 18
+			},
+			{
+				"chaptername" : "Leviticus Chapter 19",
+				"chapterdesc" : "Divers ordinances, partly moral, partly ceremonial or judicial.",
+				"chapternumber" : 19
+			},
+			{
+				"chaptername" : "Leviticus Chapter 20",
+				"chapterdesc" : "Divers crimes to be punished with death.",
+				"chapternumber" : 20
+			},
+			{
+				"chaptername" : "Leviticus Chapter 21",
+				"chapterdesc" : "Ordinances relating to the priests.",
+				"chapternumber" : 21
+			},
+			{
+				"chaptername" : "Leviticus Chapter 22",
+				"chapterdesc" : "Who may eat the holy things:  and what things may be offered.",
+				"chapternumber" : 22
+			},
+			{
+				"chaptername" : "Leviticus Chapter 23",
+				"chapterdesc" : "Holy days to be kept.",
+				"chapternumber" : 23
+			},
+			{
+				"chaptername" : "Leviticus Chapter 24",
+				"chapterdesc" : "The oil for the lamps.  The loaves of proposition.  The punishment of blasphemy.",
+				"chapternumber" : 24
+			},
+			{
+				"chaptername" : "Leviticus Chapter 25",
+				"chapterdesc" : "The law of the seventh and of the fiftieth year of jubilee.",
+				"chapternumber" : 25
+			},
+			{
+				"chaptername" : "Leviticus Chapter 26",
+				"chapterdesc" : "God's promises to them that keep his commandments.  And the many punishments with which he threatens transgressors.",
+				"chapternumber" : 26
+			},
+			{
+				"chaptername" : "Leviticus Chapter 27",
+				"chapterdesc" : "Of vows and tithes.",
+				"chapternumber" : 27
+			}
+		]
+	},
+	{
+		"booknumber" : 4,
+		"shortname" : "Numbers",
+		"contentsname" : "Book of Numbers",
+		"bookname" : "THE BOOK OF NUMBERS",
+		"bookdesc" : "This fourth Book of Moses is called NUMBERS, because it begins with the numbering of the people.  The Hebrews, from its first words, call it VAIEDABBER.  It contains the transactions of the Israelites from the second month of the second year after their going out of Egypt, until the beginning of the eleventh month of the fortieth year; that is, a history almost of thirty-nine years.",
+		"chapters" : [
+			{
+				"chaptername" : "Numbers Chapter 1",
+				"chapterdesc" : "The children of Israel are numbered:  the Levites are designed to serve the tabernacle.",
+				"chapternumber" : 1
+			},
+			{
+				"chaptername" : "Numbers Chapter 2",
+				"chapterdesc" : "The order of the tribes in their camp.",
+				"chapternumber" : 2
+			},
+			{
+				"chaptername" : "Numbers Chapter 3",
+				"chapterdesc" : "The Levites are numbered and their offices distinguished.  They are taken in the place of the firstborn of the children of Israel.",
+				"chapternumber" : 3
+			},
+			{
+				"chaptername" : "Numbers Chapter 4",
+				"chapterdesc" : "The age and time of the Levites' service:  their offices and burdens.",
+				"chapternumber" : 4
+			},
+			{
+				"chaptername" : "Numbers Chapter 5",
+				"chapterdesc" : "The unclean are removed out of the camp:  confession of sins, and satisfaction:  firstfruits and oblations belonging to the priests:  trial of jealousy.",
+				"chapternumber" : 5
+			},
+			{
+				"chaptername" : "Numbers Chapter 6",
+				"chapterdesc" : "The law of the Nazarites:  the form of blessing the people.",
+				"chapternumber" : 6
+			},
+			{
+				"chaptername" : "Numbers Chapter 7",
+				"chapterdesc" : "The offerings of the princes at the dedication of the tabernacle.  God speaketh to Moses from the propitiatory.",
+				"chapternumber" : 7
+			},
+			{
+				"chaptername" : "Numbers Chapter 8",
+				"chapterdesc" : "The seven lamps are placed on the golden candlestick, to shine towards the loaves of proposition:  the ordination of the Levites:  and to what age they shall serve in the tabernacle.",
+				"chapternumber" : 8
+			},
+			{
+				"chaptername" : "Numbers Chapter 9",
+				"chapterdesc" : "The precept of the pasch is renewed:  the unclean and travellers are to observe it the second month:  the camp is guided by the pillar of the cloud.",
+				"chapternumber" : 9
+			},
+			{
+				"chaptername" : "Numbers Chapter 10",
+				"chapterdesc" : "The silver trumpets and their use.  They march from Sinai.",
+				"chapternumber" : 10
+			},
+			{
+				"chaptername" : "Numbers Chapter 11",
+				"chapterdesc" : "The people murmur and are punished with fire.  God appointeth seventy ancients for assistants to Moses.  They prophesy.  The people have their fill of flesh, but forthwith many die of the plague.",
+				"chapternumber" : 11
+			},
+			{
+				"chaptername" : "Numbers Chapter 12",
+				"chapterdesc" : "Mary and Aaron murmur against Moses, whom God praiseth above other prophets.  Mary being struck with leprosy, Aaron confesseth his fault. Moses prayeth for her, and after seven days' separation from the camp, she is restored.",
+				"chapternumber" : 12
+			},
+			{
+				"chaptername" : "Numbers Chapter 13",
+				"chapterdesc" : "The twelve spies are sent to view the land.  The relation they make of it.",
+				"chapternumber" : 13
+			},
+			{
+				"chaptername" : "Numbers Chapter 14",
+				"chapterdesc" : "The people murmur.  God threateneth to destroy them.  He is appeased by Moses, yet so as to exclude the murmurers from entering the promised land.  The authors of the sedition are struck dead.  The rest going to fight against the will of God are beaten.",
+				"chapternumber" : 14
+			},
+			{
+				"chaptername" : "Numbers Chapter 15",
+				"chapterdesc" : "Certain laws concerning sacrifices.  Sabbath breaking is punished with death.  The law of fringes on their garments.",
+				"chapternumber" : 15
+			},
+			{
+				"chaptername" : "Numbers Chapter 16",
+				"chapterdesc" : "The schism of Core and his adherents:  their punishment.",
+				"chapternumber" : 16
+			},
+			{
+				"chaptername" : "Numbers Chapter 17",
+				"chapterdesc" : "The priesthood is confirmed to Aaron by the miracle of the blooming of his rod, which is kept for a monument in the tabernacle.",
+				"chapternumber" : 17
+			},
+			{
+				"chaptername" : "Numbers Chapter 18",
+				"chapterdesc" : "The charge of the priests and of the Levites, and their portion.",
+				"chapternumber" : 18
+			},
+			{
+				"chaptername" : "Numbers Chapter 19",
+				"chapterdesc" : "The law of the sacrifice of the red cow, and the water of expiation.",
+				"chapternumber" : 19
+			},
+			{
+				"chaptername" : "Numbers Chapter 20",
+				"chapterdesc" : "The death of Mary the sister of Moses.  The people murmur for want of water:  God giveth it them from the rock.  The death of Aaron.",
+				"chapternumber" : 20
+			},
+			{
+				"chaptername" : "Numbers Chapter 21",
+				"chapterdesc" : "King Arad is overcome.  The people murmur and are punished with fiery serpents:  they are healed by the brazen serpent.  They conquer the kings Sehon and Og.",
+				"chapternumber" : 21
+			},
+			{
+				"chaptername" : "Numbers Chapter 22",
+				"chapterdesc" : "Balac, king of Moab, sendeth twice for Balaam to curse Israel.  In his way Balaam is rebuked by an angel.",
+				"chapternumber" : 22
+			},
+			{
+				"chaptername" : "Numbers Chapter 23",
+				"chapterdesc" : "Balaam, instead of cursing Israel, is obliged to bless them, and prophesy good things of them.",
+				"chapternumber" : 23
+			},
+			{
+				"chaptername" : "Numbers Chapter 24",
+				"chapterdesc" : "Balaam still continues to prophesy good things in favour of Israel.",
+				"chapternumber" : 24
+			},
+			{
+				"chaptername" : "Numbers Chapter 25",
+				"chapterdesc" : "The people fall into fornication and idolatry; for which twenty-four thousand are slain.  The zeal of Phinees.",
+				"chapternumber" : 25
+			},
+			{
+				"chaptername" : "Numbers Chapter 26",
+				"chapterdesc" : "The people are again numbered by their tribes and families.",
+				"chapternumber" : 26
+			},
+			{
+				"chaptername" : "Numbers Chapter 27",
+				"chapterdesc" : "The law of inheritance.  Josue is appointed to succeed Moses.",
+				"chapternumber" : 27
+			},
+			{
+				"chaptername" : "Numbers Chapter 28",
+				"chapterdesc" : "Sacrifices are appointed as well for every day as for sabbaths, and other festivals.",
+				"chapternumber" : 28
+			},
+			{
+				"chaptername" : "Numbers Chapter 29",
+				"chapterdesc" : "Sacrifices for the festivals of the seventh month.",
+				"chapternumber" : 29
+			},
+			{
+				"chaptername" : "Numbers Chapter 30",
+				"chapterdesc" : "Of vows and oaths:  and their obligation.",
+				"chapternumber" : 30
+			},
+			{
+				"chaptername" : "Numbers Chapter 31",
+				"chapterdesc" : "The Madianites are slain for having drawn the people of Israel into sin.  The dividing of the booty.",
+				"chapternumber" : 31
+			},
+			{
+				"chaptername" : "Numbers Chapter 32",
+				"chapterdesc" : "The tribes of Ruben and Gad, and half of the tribe of Manasses, receive their inheritance on the east side of Jordan, upon conditions approved of by Moses.",
+				"chapternumber" : 32
+			},
+			{
+				"chaptername" : "Numbers Chapter 33",
+				"chapterdesc" : "The mansions or journeys of the children of Israel towards the land of promise.",
+				"chapternumber" : 33
+			},
+			{
+				"chaptername" : "Numbers Chapter 34",
+				"chapterdesc" : "The limits of Chanaan; with the names of the men that make the division of it.",
+				"chapternumber" : 34
+			},
+			{
+				"chaptername" : "Numbers Chapter 35",
+				"chapterdesc" : "Cities are appointed for the Levites.  Of which six are to be the cities of refuge.",
+				"chapternumber" : 35
+			},
+			{
+				"chaptername" : "Numbers Chapter 36",
+				"chapterdesc" : "That the inheritances may not be alienated from one tribe to another, all are to marry within their own tribes.",
+				"chapternumber" : 36
+			}
+		]
+	},
+	{
+		"booknumber" : 5,
+		"shortname" : "Deuteronomy",
+		"contentsname" : "Book of Deuteronomy",
+		"bookname" : "THE BOOK OF DEUTERONOMY",
+		"bookdesc" : "This Book is called DEUTERONOMY, which signifies a SECOND LAW, because it repeats and inculcates the ordinances formerly given on mount Sinai, with other precepts not expressed before.  The Hebrews, from the first words in the book, call it ELLE HADDEBARIM.",
+		"chapters" : [
+			{
+				"chaptername" : "Deuteronomy Chapter 1",
+				"chapterdesc" : "A repetition of what passed at Sinai and Cadesbarne:  and of the people's murmuring and their punishment.",
+				"chapternumber" : 1
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 2",
+				"chapterdesc" : "They are forbid to fight against the Edomites, Moabites, and Ammonites. Their victory over Sehon king of Hesebon.",
+				"chapternumber" : 2
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 3",
+				"chapterdesc" : "The victory over Og king of Basan.  Ruben, Gad, and half the tribe of Manasses receive their possession on the other side of Jordan.",
+				"chapternumber" : 3
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 4",
+				"chapterdesc" : "Moses exhorteth the people to keep God's commandments:  particularly to fly idolatry.  Appointeth three cities of refuge, on that side of the Jordan.",
+				"chapternumber" : 4
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 5",
+				"chapterdesc" : "The ten commandments are repeated and explained.",
+				"chapternumber" : 5
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 6",
+				"chapterdesc" : "An exhortation to the love of God, and obedience to his law.",
+				"chapternumber" : 6
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 7",
+				"chapterdesc" : "No league nor fellowship to be made with the Chanaanites:  God promiseth his people his blessing and assistance, if they keep his commandments.",
+				"chapternumber" : 7
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 8",
+				"chapterdesc" : "The people is put in mind of God's dealings with them, to the end that they may love him and serve him.",
+				"chapternumber" : 8
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 9",
+				"chapterdesc" : "Lest they should impute their victories to their own merits, they are put in mind of their manifold rebellions and other sins, for which they should have been destroyed, but God spared them for his promise made to Abraham, Isaac, and Jacob.",
+				"chapternumber" : 9
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 10",
+				"chapterdesc" : "God giveth the second tables of the law:  a further exhortation to fear and serve the Lord.",
+				"chapternumber" : 10
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 11",
+				"chapterdesc" : "The love and service of God are still inculcated, with a blessing to them that serve him, and threats of punishment if they forsake his law.",
+				"chapternumber" : 11
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 12",
+				"chapterdesc" : "All idolatry must be extirpated:  sacrifices, tithes, and firstfruits must be offered in one only place:  all eating of blood is prohibited.",
+				"chapternumber" : 12
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 13",
+				"chapterdesc" : "False prophets must be slain, and idolatrous cities destroyed.",
+				"chapternumber" : 13
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 14",
+				"chapterdesc" : "In mourning for the dead they are not to follow the ways of the Gentiles:  the distinction of clean and unclean meats:  ordinances concerning tithes, and firstfruits.",
+				"chapternumber" : 14
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 15",
+				"chapterdesc" : "The law of the seventh year of remission.  The firstlings of cattle are to be sanctified to the Lord.",
+				"chapternumber" : 15
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 16",
+				"chapterdesc" : "The three principal solemnities to be observed:  just judges to be appointed in every city:  all occasions of idolatry to be avoided.",
+				"chapternumber" : 16
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 17",
+				"chapterdesc" : "Victims must be without blemish.  Idolaters are to be slain. Controversies are to be decided by the high priest and council, whose sentence must be obeyed under pain of death.  The duty of a king, who is to receive the law of God at the priest's hands.",
+				"chapternumber" : 17
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 18",
+				"chapterdesc" : "The Lord is the inheritance of the priests and Levites.  Heathenish abominations are to be avoided.  The great PROPHET CHRIST is promised. False prophets must be slain.",
+				"chapternumber" : 18
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 19",
+				"chapterdesc" : "The cities of refuge.  Wilful murder, and false witnesses must be punished.",
+				"chapternumber" : 19
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 20",
+				"chapterdesc" : "Laws relating to war.",
+				"chapternumber" : 20
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 21",
+				"chapterdesc" : "The expiation of a secret murder.  The marrying a captive.  The eldest son must not be deprived of his birthright for hatred of his mother.  A stubborn son is to be stoned to death.  When one is hanged on a gibbet, he must be taken down the same day and buried.",
+				"chapternumber" : 21
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 22",
+				"chapterdesc" : "Humanity towards neighbours.  Neither sex may use the apparel of the other.  Cruelty to be avoided even to birds.  Battlements about the roof of a house.  Things of divers kinds not to be mixed.  The punishment of him that slandereth his wife, as also of adultery and rape.",
+				"chapternumber" : 22
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 23",
+				"chapterdesc" : "Who may and who may not enter into the church:  uncleanness to be avoided:  other precepts concerning fugitives, fornication, usury, vows, and eating other men's grapes and corn.",
+				"chapternumber" : 23
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 24",
+				"chapterdesc" : "Divorce permitted to avoid greater evil:  the newly married must not go to war:  of men stealers, of leprosy, of pledges, of labourers' hire, of justice, and of charity to the poor.",
+				"chapternumber" : 24
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 25",
+				"chapterdesc" : "Stripes must not exceed forty.  The ox is not to be muzzled.  Of raising seed to the brother.  Of the immodest woman.  Of unjust weight.  Of destroying the Amalecites.",
+				"chapternumber" : 25
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 26",
+				"chapterdesc" : "The form of words with which the firstfruits and tithes are to be offered.  God's covenant.",
+				"chapternumber" : 26
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 27",
+				"chapterdesc" : "The commandments must be written on stones:  and an altar erected, and sacrifices offered.  The observers of the commandments are to be blessed, and the transgressors cursed.",
+				"chapternumber" : 27
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 28",
+				"chapterdesc" : "Many blessings are promised to observers of God's commandments:  and curses threatened to transgressors.",
+				"chapternumber" : 28
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 29",
+				"chapterdesc" : "The covenant is solemnly confirmed between God and his people.  Threats against those that shall break it.",
+				"chapternumber" : 29
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 30",
+				"chapterdesc" : "Great mercies are promised to the penitent:  God's commandment is feasible.  Life and death are set before them.",
+				"chapternumber" : 30
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 31",
+				"chapterdesc" : "Moses encourageth the people, and Josue, who is appointed to succeed him.  He delivereth the law to the priests.  God foretelleth that the people will often forsake him, and that he will punish them.  He commandeth Moses to write a canticle, as a constant remembrancer of the law.",
+				"chapternumber" : 31
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 32",
+				"chapterdesc" : "A canticle for the remembrance of the law.  Moses is commanded to go up into a mountain, from whence he shall see the promised land but not enter into it.",
+				"chapternumber" : 32
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 33",
+				"chapterdesc" : "Moses before his death blesseth the tribes of Israel.",
+				"chapternumber" : 33
+			},
+			{
+				"chaptername" : "Deuteronomy Chapter 34",
+				"chapterdesc" : "Moses seeth the promised land, but is not suffered to go into it.  He dieth at the age of 120 years.  God burieth his body secretly, and all Israel mourn for him thirty days.  Josue, replenished (by imposition of Moses's hands) with the spirit of God, succeedeth.  But Moses, for his special familiarity with God, and for most wonderful miracles, is commended above all other prophets.",
+				"chapternumber" : 34
+			}
+		]
+	},
+	{
+		"booknumber" : 6,
+		"shortname" : "Josue",
+		"contentsname" : "Book of Josue",
+		"bookname" : "THE BOOK OF JOSUE",
+		"bookdesc" : "This Book is called JOSUE, because it contains the history of what passed under him, and according to the common opinion was written by him.  The Greeks call him Jesus:  for Josue and Jesus in the Hebrew, are the same name, and have the same signification, viz., A SAVIOUR.  And it was not without a mystery that he who was to bring the people into the land of promise should have his name changed from OSEE (for so he was called before, Num. 13.17,) to JOSUE or JESUS, to give us to understand, that Moses by his law could only bring the people within sight of the promised inheritance, but that our Saviour JESUS was to bring us into it.",
+		"chapters" : [
+			{
+				"chaptername" : "Josue Chapter 1",
+				"chapterdesc" : "Josue, encouraged by the Lord, admonisheth the people to prepare themselves to pass over the Jordan.",
+				"chapternumber" : 1
+			},
+			{
+				"chaptername" : "Josue Chapter 2",
+				"chapterdesc" : "Two spies are sent to Jericho, who are received and concealed by Rahab.",
+				"chapternumber" : 2
+			},
+			{
+				"chaptername" : "Josue Chapter 3",
+				"chapterdesc" : "The river Jordan is miraculously dried up for the passage of the children of Israel.",
+				"chapternumber" : 3
+			},
+			{
+				"chaptername" : "Josue Chapter 4",
+				"chapterdesc" : "Twelve stones are taken out of the river to be set up for a monument of the miracle; and other twelve are placed in the midst of the river.",
+				"chapternumber" : 4
+			},
+			{
+				"chaptername" : "Josue Chapter 5",
+				"chapterdesc" : "The people are circumcised:  they keep the pasch.  The manna ceaseth.  An angel appeareth to Josue.",
+				"chapternumber" : 5
+			},
+			{
+				"chaptername" : "Josue Chapter 6",
+				"chapterdesc" : "After seven days' processions, the priests sounding the trumpets, the walls of Jericho fall down:  and the city is taken and destroyed.",
+				"chapternumber" : 6
+			},
+			{
+				"chaptername" : "Josue Chapter 7",
+				"chapterdesc" : "For the sins of Achan, the Israelites are defeated at Hai.  The offender is found out; and stoned to death, and God's wrath is turned from them.",
+				"chapternumber" : 7
+			},
+			{
+				"chaptername" : "Josue Chapter 8",
+				"chapterdesc" : "Hai is taken and burnt, and all the inhabitants slain.  An altar is built, and sacrifices offered.  The law is written on stones, and the blessings and cursings are read before all the people.",
+				"chapternumber" : 8
+			},
+			{
+				"chaptername" : "Josue Chapter 9",
+				"chapterdesc" : "Josue is deceived by the Gabaonites:  who being detected are condemned to be perpetual servants.",
+				"chapternumber" : 9
+			},
+			{
+				"chaptername" : "Josue Chapter 10",
+				"chapterdesc" : "Five kings war against Gabaon.  Josue defeateth them:  many are slain with hailstones.  At the prayer of Josue the sun and moon stand still the space of one day.  The five kings are hanged.  Divers cities are taken.",
+				"chapternumber" : 10
+			},
+			{
+				"chaptername" : "Josue Chapter 11",
+				"chapterdesc" : "The kings of the north are overthrown:  the whole country is taken.",
+				"chapternumber" : 11
+			},
+			{
+				"chaptername" : "Josue Chapter 12",
+				"chapterdesc" : "A list of the kings slain by Moses and Josue,",
+				"chapternumber" : 12
+			},
+			{
+				"chaptername" : "Josue Chapter 13",
+				"chapterdesc" : "God commandeth Josue to divide the land:  the possessions of Ruben, Gad, and half the tribe of Manasses, beyond the Jordan.",
+				"chapternumber" : 13
+			},
+			{
+				"chaptername" : "Josue Chapter 14",
+				"chapterdesc" : "Caleb's petition; Hebron is given to him and to his seed.",
+				"chapternumber" : 14
+			},
+			{
+				"chaptername" : "Josue Chapter 15",
+				"chapterdesc" : "The borders of the lot of Juda.  Caleb's portion and conquest.  The cities of Juda.",
+				"chapternumber" : 15
+			},
+			{
+				"chaptername" : "Josue Chapter 16",
+				"chapterdesc" : "The lot of the sons of Joseph.  The borders of the tribe of Ephraim.",
+				"chapternumber" : 16
+			},
+			{
+				"chaptername" : "Josue Chapter 17",
+				"chapterdesc" : "The lot of the half tribe of Manasses.",
+				"chapternumber" : 17
+			},
+			{
+				"chaptername" : "Josue Chapter 18",
+				"chapterdesc" : "Surveyors are sent to divide the rest of the land into seven tribes. The lot of Benjamin.",
+				"chapternumber" : 18
+			},
+			{
+				"chaptername" : "Josue Chapter 19",
+				"chapterdesc" : "The lots of the tribes of Simeon, Zabulon, Issachar, Aser, Nephtali and Dan.  A city is given to Josue.",
+				"chapternumber" : 19
+			},
+			{
+				"chaptername" : "Josue Chapter 20",
+				"chapterdesc" : "The cities of refuge are appointed for casual manslaughter.",
+				"chapternumber" : 20
+			},
+			{
+				"chaptername" : "Josue Chapter 21",
+				"chapterdesc" : "Cities with their suburbs are assigned for the priests and Levites.",
+				"chapternumber" : 21
+			},
+			{
+				"chaptername" : "Josue Chapter 22",
+				"chapterdesc" : "The tribes of Ruben and Gad, and half the tribe of Manasses return to their possessions.  They build an altar by the side of the Jordan, which alarms the other tribes.  An embassage is sent to them, to which they give a satisfactory answer.",
+				"chapternumber" : 22
+			},
+			{
+				"chaptername" : "Josue Chapter 23",
+				"chapterdesc" : "Josue being old admonisheth the people to keep God's commandments:  and to avoid marriages and all society with the Gentiles for fear of being brought to idolatry.",
+				"chapternumber" : 23
+			},
+			{
+				"chaptername" : "Josue Chapter 24",
+				"chapterdesc" : "Josue assembleth the people, and reneweth the covenant between them and God.  His death and burial.",
+				"chapternumber" : 24
+			}
+		]
+	},
+	{
+		"booknumber" : 7,
+		"shortname" : "Judges",
+		"contentsname" : "Book of Judges",
+		"bookname" : "THE BOOK OF JUDGES",
+		"bookdesc" : "This Book is called JUDGES, because it contains the history of what passed under the government of the judges, who ruled Israel before they had kings.  The writer of it, according to the more general opinion, was the prophet Samuel.",
+		"chapters" : [
+			{
+				"chaptername" : "Judges Chapter 1",
+				"chapterdesc" : "The expedition and victory of Juda against the Chanaanites:  who are tolerated in many places.",
+				"chapternumber" : 1
+			},
+			{
+				"chaptername" : "Judges Chapter 2",
+				"chapterdesc" : "An angel reproveth Israel.  They weep for their sins.  After the death of Josue, they often fall, and repenting are delivered from their afflictions, but still fall worse and worse.",
+				"chapternumber" : 2
+			},
+			{
+				"chaptername" : "Judges Chapter 3",
+				"chapterdesc" : "The people falling into idolatry are oppressed by their enemies; but repenting are delivered by Othoniel, Aod, and Samgar.",
+				"chapternumber" : 3
+			},
+			{
+				"chaptername" : "Judges Chapter 4",
+				"chapterdesc" : "Debbora and Barac deliver Israel from Jabin and Sisara, Jahal killeth Sisara.",
+				"chapternumber" : 4
+			},
+			{
+				"chaptername" : "Judges Chapter 5",
+				"chapterdesc" : "The canticle of Debbora and Barac after their victory.",
+				"chapternumber" : 5
+			},
+			{
+				"chaptername" : "Judges Chapter 6",
+				"chapterdesc" : "The people for their sins, are oppressed by the Madianites.  Gedeon is called to deliver them.",
+				"chapternumber" : 6
+			},
+			{
+				"chaptername" : "Judges Chapter 7",
+				"chapterdesc" : "Gedeon, with three hundred men, by stratagem defeateth the Madianites.",
+				"chapternumber" : 7
+			},
+			{
+				"chaptername" : "Judges Chapter 8",
+				"chapterdesc" : "Gedeon appeaseth the Ephraimites.  Taketh Zebee and Salmana.  Destroyeth Soccoth and Phanuel.  Refuseth to be king.  Maketh an ephod of the gold of the prey, and dieth in a good old age.  The people return to idolatry.",
+				"chapternumber" : 8
+			},
+			{
+				"chaptername" : "Judges Chapter 9",
+				"chapterdesc" : "Abimelech killeth his brethren.  Joatham's parable.  Gaal conspireth with the Sichemites against Abimelech, but is overcome.  Abimelech destroyeth Sichem:  but is killed at Thebes.",
+				"chapternumber" : 9
+			},
+			{
+				"chaptername" : "Judges Chapter 10",
+				"chapterdesc" : "Thola ruleth Israel twenty-three years; and Jair twenty-two.  The people fall again into idolatry, and are afflicted again by the Philistines and Ammonites.  They cry to God for help, who upon their repentance hath compassion on them.",
+				"chapternumber" : 10
+			},
+			{
+				"chaptername" : "Judges Chapter 11",
+				"chapterdesc" : "Jephte is made ruler of the people of Galaad:  he first pleads their cause against the Ammonites; then making a vow obtains a signal victory; he performs his vow.",
+				"chapternumber" : 11
+			},
+			{
+				"chaptername" : "Judges Chapter 12",
